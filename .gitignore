@@ -1,0 +1,23 @@
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.bak
+*.tmp
+*~
+
+# Runtime cache and watch history
+.every-cli-cache/
+history
+
+# Development scratch files
+test_*.sh
+test_*.py
+scratch/
+
+# Reference sub-repositories if kept in tree
+ani-cli-master/
+mov-cli-4/
+yt-dlp-master/
+ytfzf-master/
+_references/

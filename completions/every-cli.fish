@@ -1,0 +1,12 @@
+# Fish completion for every-cli
+complete -c every-cli -s c -l category -x -a 'anime movies tv cartoons youtube live' -d 'Content category'
+complete -c every-cli -s e -l episode -x -d 'Episode number or range'
+complete -c every-cli -s q -l quality -x -a 'best 1080 720 480 360' -d 'Video quality'
+complete -c every-cli -s d -l download -d 'Download instead of streaming'
+complete -c every-cli -l dub -d 'Use dubbed audio (anime)'
+complete -c every-cli -l vlc -d 'Use VLC player'
+complete -c every-cli -l no-color -d 'Disable colours'
+complete -c every-cli -l continue -d 'Resume from history'
+complete -c every-cli -s U -l update -d 'Self-update'
+complete -c every-cli -s v -l version -d 'Print version'
+complete -c every-cli -s h -l help -d 'Show help'

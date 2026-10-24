@@ -1,0 +1,100 @@
+.TH EVERY-CLI 1 "2025-01-01" "1.0.0" "every-cli Manual"
+.SH NAME
+every-cli \- stream and download anime, movies, TV, cartoons, YouTube, and live TV from the terminal
+.SH SYNOPSIS
+.B every-cli
+[\fIOPTIONS\fR] [\fIQUERY\fR]
+.SH DESCRIPTION
+.B every-cli
+is a cross-platform terminal tool to stream and download free anime, movies, TV shows, cartoons, YouTube videos, and live IPTV channels. It unifies the functionality of ani-cli, mov-cli, ytfzf, and yt-dlp into a single CLI.
+.PP
+All sources use a multi-level fallback chain with YouTube as the universal last resort.
+.SH OPTIONS
+.TP
+.BR \-c ", " \-\-category " " \fICATEGORY\fR
+Content category: anime, movies, tv, cartoons, youtube, live
+.TP
+.BR \-e ", " \-\-episode " " \fIEP\fR
+Episode number or range (e.g. 5 or 1-12)
+.TP
+.BR \-q ", " \-\-quality " " \fIQ\fR
+Video quality: best, 1080, 720, 480, 360 (default: best)
+.TP
+.BR \-d ", " \-\-download
+Download instead of streaming
+.TP
+.B \-\-dub
+Use dubbed audio (anime only)
+.TP
+.B \-\-vlc
+Use VLC as media player
+.TP
+.B \-\-no-color
+Disable terminal colours
+.TP
+.B \-\-continue
+Resume from watch history
+.TP
+.BR \-U ", " \-\-update
+Self-update from GitHub
+.TP
+.BR \-v ", " \-\-version
+Print version and exit
+.TP
+.BR \-h ", " \-\-help
+Show help message
+.SH ENVIRONMENT
+.TP
+.B EVERY_CLI_PLAYER
+Media player to use (default: mpv). Supported: mpv, vlc, iina
+.TP
+.B EVERY_CLI_QUALITY
+Default video quality
+.TP
+.B EVERY_CLI_LANG
+Anime language: sub or dub (default: sub)
+.TP
+.B EVERY_CLI_DOWNLOAD_DIR
+Download directory (default: ~/Videos/every-cli)
+.TP
+.B EVERY_CLI_COLOR
+Set to 0 to disable colours
+.TP
+.B EVERY_CLI_HIST_DIR
+History directory (default: ~/.local/share/every-cli)
+.SH EXAMPLES
+.nf
+every-cli                                  # interactive menu
+every-cli -c anime "Attack on Titan"       # search anime
+every-cli -c movies "Inception"            # search movies
+every-cli -c tv "Breaking Bad"             # search TV shows
+every-cli -c cartoons "SpongeBob"          # search cartoons
+every-cli -c youtube "lo-fi mix"           # search YouTube
+every-cli -c live                          # IPTV browser
+every-cli -c anime -d -e 1-13 "Naruto"     # download episodes
+.fi
+.SH FALLBACK CHAIN
+.nf
+ANIME:    HiAnime → AllAnime → YouTube
+MOVIES:   VidSrc.to → YouTube
+TV:       VidSrc.to → YouTube
+CARTOONS: ToonGet → WCOFun → KimCartoon → YouTube
+YOUTUBE:  yt-dlp (direct)
+LIVE TV:  iptv-org M3U (direct)
+.fi
+.SH FILES
+.TP
+.I ~/.config/every-cli/config
+User configuration file (sourced as shell)
+.TP
+.I ~/.local/share/every-cli/history
+Watch history
+.SH DEPENDENCIES
+curl, fzf, mpv, yt-dlp, ffmpeg (required); curl-impersonate-chrome, vlc (optional)
+.SH LICENSE
+GPL-3.0
+.SH SEE ALSO
+.BR ani-cli (1),
+.BR yt-dlp (1),
+.BR mpv (1),
+.BR fzf (1)

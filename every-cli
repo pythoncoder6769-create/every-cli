@@ -1,0 +1,152 @@
+#!/bin/sh
+# every-cli — stream everything for free
+# GPL-3.0 | https://github.com/pythoncoder6769-create/every-cli
+set -e
+
+VERSION="1.0.0"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+if [ -d "$SCRIPT_DIR/lib" ]; then
+  LIB_DIR="$SCRIPT_DIR/lib"
+elif [ -d "$HOME/.every-cli/lib" ]; then
+  LIB_DIR="$HOME/.every-cli/lib"
+elif [ -d "${XDG_DATA_HOME:-$HOME/.local/share}/every-cli/lib" ]; then
+  LIB_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/every-cli/lib"
+elif [ -d "/usr/local/share/every-cli/lib" ]; then
+  LIB_DIR="/usr/local/share/every-cli/lib"
+elif [ -d "/usr/share/every-cli/lib" ]; then
+  LIB_DIR="/usr/share/every-cli/lib"
+else
+  LIB_DIR="$SCRIPT_DIR/lib"
+fi
+
+# Load core
+. "$LIB_DIR/core.sh"
+
+# Load user config
+CONF="$HOME/.config/every-cli/config"
+[ -f "$CONF" ] && . "$CONF"
+
+# Load scrapers
+. "$LIB_DIR/scrapers/hianime.sh"
+. "$LIB_DIR/scrapers/allanime.sh"
+. "$LIB_DIR/scrapers/supercartoons.sh"
+. "$LIB_DIR/scrapers/archive_org.sh"
+. "$LIB_DIR/scrapers/imdb.sh"
+. "$LIB_DIR/scrapers/vidsrc.sh"
+. "$LIB_DIR/scrapers/yt_search.sh"
+
+# Load providers
+. "$LIB_DIR/providers/anime.sh"
+. "$LIB_DIR/providers/movies.sh"
+. "$LIB_DIR/providers/cartoons.sh"
+. "$LIB_DIR/providers/youtube.sh"
+. "$LIB_DIR/providers/live_tv.sh"
+
+# ── Parse arguments ──────────────────────────────────────────────────────────
+CATEGORY=""
+QUERY=""
+EPISODE=""
+DOWNLOAD=0
+LANG="${EVERY_CLI_LANG:-sub}"
+QUALITY="${EVERY_CLI_QUALITY:-best}"
+
+usage() {
+  cat <<EOF
+${C_BLD}every-cli${C_RST} v$VERSION — stream everything for free
+
+${C_BLD}USAGE${C_RST}
+  every-cli [OPTIONS] [QUERY]
+
+${C_BLD}OPTIONS${C_RST}
+  -c, --category CATEGORY   anime|movies|tv|cartoons|youtube|live
+  -e, --episode EP          Episode number or range (e.g. 5 or 1-12)
+  -q, --quality Q           best|1080|720|480|360 (default: best)
+  -d, --download            Download instead of streaming
+      --dub                 Dubbed audio (anime only)
+      --vlc                 Use VLC player
+      --no-color            Disable colours
+      --continue            Resume from history
+  -U, --update              Self-update from GitHub
+  -v, --version             Print version
+  -h, --help                This help
+
+${C_BLD}EXAMPLES${C_RST}
+  every-cli                              # interactive menu
+  every-cli -c anime "Attack on Titan"   # search anime
+  every-cli -c movies "Inception"        # search movies
+  every-cli -c tv "Breaking Bad"         # search TV shows
+  every-cli -c cartoons "SpongeBob"      # search cartoons (4-source fallback)
+  every-cli -c youtube "lo-fi mix"       # search YouTube
+  every-cli -c live                      # IPTV browser
+  every-cli -c anime -d -e 1-13 "Naruto" # download episodes 1-13
+EOF
+}
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -c|--category) CATEGORY="$2"; shift 2 ;;
+    -e|--episode|-r|--range) EPISODE="$2"; shift 2 ;;
+    -q|--quality) QUALITY="$2"; EVERY_CLI_QUALITY="$2"; QUALITY_GIVEN=1; export QUALITY_GIVEN; shift 2 ;;
+    -d|--download) DOWNLOAD=1; shift ;;
+    --dub) LANG=dub; EVERY_CLI_LANG=dub; DUB_GIVEN=1; export DUB_GIVEN; shift ;;
+    --vlc) EVERY_CLI_PLAYER=vlc; shift ;;
+    --no-color) EVERY_CLI_COLOR=0; shift ;;
+    --continue) hist_show; exit 0 ;;
+    -U|--update) self_update; exit 0 ;;
+    -v|--version) printf 'every-cli %s\n' "$VERSION"; exit 0 ;;
+    -h|--help) usage; exit 0 ;;
+    -*) err "Unknown option: $1"; usage; exit 1 ;;
+    *) QUERY="$1"; shift ;;
+  esac
+done
+
+trap 'exit 0' INT TERM
+
+# ── Dependency check ──────────────────────────────────────────────────────────
+dep_check curl fzf mpv yt-dlp
+
+show_banner() {
+  [ "${EVERY_CLI_COLOR:-1}" = "0" ] && return
+  local tip
+  tip=$(random_tip)
+  printf "\n${C_BLD}${C_CYN}  every-cli v%s${C_RST} ${C_BLU}─${C_RST} ${C_BLD}Terminal Media Center${C_RST}\n" "$VERSION"
+  printf "  ${C_YLW}%s${C_RST}\n\n" "$tip"
+}
+
+
+# ── Category menu (if no -c given) ───────────────────────────────────────────
+if [ -z "$CATEGORY" ]; then
+  show_banner
+  cat_choice=$(printf '%s\n' \
+    "anime       Anime streaming (HiAnime 1080p, Sub & Dub)" \
+    "movies      Movies & Cinema (IMDb search & direct streaming)" \
+    "tv          TV Shows & Series (Seasons, episodes & streaming)" \
+    "cartoons    Cartoons (SuperCartoons 1500+ & Archive.org direct MP4)" \
+    "youtube     YouTube (1080p HD video, podcasts & music)" \
+    "live        Live TV (8,000+ international IPTV channels)" \
+    "history     History (Resume previously watched streams)" \
+    | fzf_prompt "Category")
+  [ -z "$cat_choice" ] && exit 0
+  case "$cat_choice" in
+    anime*)    CATEGORY="anime" ;;
+    movies*)   CATEGORY="movies" ;;
+    tv*)       CATEGORY="tv" ;;
+    cartoons*) CATEGORY="cartoons" ;;
+    youtube*)  CATEGORY="youtube" ;;
+    live*)     CATEGORY="live" ;;
+    history*)  hist_show; exit 0 ;;
+    *)         CATEGORY="anime" ;;
+  esac
+fi
+
+
+# ── Dispatch ──────────────────────────────────────────────────────────────────
+case "$CATEGORY" in
+  anime)    anime_search_and_play "$QUERY" "$EPISODE" "$DOWNLOAD" ;;
+  movies)   movies_search_and_play "$QUERY" "movie" "$DOWNLOAD" ;;
+  tv)       movies_search_and_play "$QUERY" "tv" "$DOWNLOAD" ;;
+  cartoons) cartoons_search_and_play "$QUERY" "$DOWNLOAD" ;;
+  youtube)  youtube_search_and_play "$QUERY" "$DOWNLOAD" ;;
+  live)     live_tv_browse ;;
+  *)        err "Unknown category: $CATEGORY"; usage; exit 1 ;;
+esac
