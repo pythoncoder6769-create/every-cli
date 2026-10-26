@@ -56,7 +56,13 @@ archive_episodes() {
         gsub(/%20/, " ", title)
         gsub(/\./, " ", title)
         gsub(/^[ \t]+|[ \t]+$/, "", title)
-        printf "%s\t%s\t%s\n", title, id, file
+        size_str = ""
+        if (match($0, /"size":"([0-9]+)"/, sm)) {
+          bytes = sm[1] + 0
+          if (bytes >= 1073741824) size_str = sprintf(" [%.1f GB]", bytes / 1073741824)
+          else if (bytes >= 1048576) size_str = sprintf(" [%.0f MB]", bytes / 1048576)
+        }
+        printf "%s%s\t%s\t%s\n", title, size_str, id, file
       }
     }
   ' | sort -u -t$'\t' -k1,1

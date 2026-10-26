@@ -280,13 +280,23 @@ play_url() {
 
   case "$player" in
     mpv)
-      "$mpv_bin" --really-quiet --hwdec=auto \
-        --demuxer-max-bytes=150M \
+      "$mpv_bin" \
+        --force-window=immediate \
+        --hwdec=auto \
+        --term-osd-bar \
+        --msg-level=all=warn,cplayer=info \
+        --demuxer-readahead-secs=20 \
+        --demuxer-max-bytes=50M \
         ${extra_mpv:+"$extra_mpv"} \
         ${ytdl_fmt:+"$ytdl_fmt"} \
         ${refr:+--referrer="$refr"} \
         ${sub:+--sub-file="$sub"} \
-        --title="$title" "$url" ;;
+        --title="$title" "$url"
+      local exit_code=$?
+      if [ $exit_code -ne 0 ]; then
+        warn "Playback ended or stream was unavailable (exit code: $exit_code)."
+      fi
+      return $exit_code ;;
 
     vlc)
       if command -v vlc >/dev/null 2>&1; then

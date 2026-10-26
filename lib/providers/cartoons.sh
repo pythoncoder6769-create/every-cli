@@ -26,29 +26,32 @@ cartoons_search_and_play() {
     [ -z "$query" ] && return
   fi
 
-  # Source 1: SuperCartoons (1500+ classic & retro cartoons)
+  # Check SuperCartoons for vintage retro shorts (Looney Tunes, Tom & Jerry, etc.)
   local sc_results
-  sc_results=$(spin_task "Searching SuperCartoons for '$query'..." supercartoons_search "$query")
+  sc_results=$(supercartoons_search "$query" 2>/dev/null)
   if [ -n "$sc_results" ]; then
-    _cartoons_play_supercartoons "$sc_results" "$download_mode" && return 0
+    local src_choice
+    src_choice=$(printf "HD Episodes & Series (1080p)\nSuperCartoons Classic Shorts (1500+ direct MP4s)\nArchive.org Vault\n" \
+      | fzf_prompt "Select source for '$query'")
+    case "$src_choice" in
+      *SuperCartoons*)
+        _cartoons_play_supercartoons "$sc_results" "$download_mode" && return 0
+        ;;
+      *Archive*)
+        local arc_results
+        arc_results=$(spin_task "Searching Archive.org for '$query'..." archive_search "$query")
+        if [ -n "$arc_results" ]; then
+          _cartoons_play_archive "$arc_results" "$download_mode" "$query" && return 0
+        fi
+        ;;
+      *)
+        _cartoons_youtube_fallback "$query" "$download_mode" && return 0
+        ;;
+    esac
+  else
+    # Direct fast HD episode search
+    _cartoons_youtube_fallback "$query" "$download_mode" && return 0
   fi
-
-  # Source 2: Archive.org Complete Cartoon Series
-  local arc_results
-  arc_results=$(spin_task "Searching Archive.org series collections for '$query'..." archive_search "$query")
-  if [ -n "$arc_results" ]; then
-    _cartoons_play_archive "$arc_results" "$download_mode" "$query" && return 0
-  fi
-
-  # Source 3: HiAnime Western & Anime Animation
-  local hi_results
-  hi_results=$(spin_task "Searching HiAnime animation for '$query'..." hianime_search "$query")
-  if [ -n "$hi_results" ]; then
-    _cartoons_play_hianime "$hi_results" "$download_mode" && return 0
-  fi
-
-  # Source 4: YouTube Full Episode Archive
-  _cartoons_youtube_fallback "$query" "$download_mode"
 }
 
 _cartoons_play_supercartoons() {

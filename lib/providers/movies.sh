@@ -64,22 +64,28 @@ movies_search_and_play() {
     episode="${episode:-1}"
   fi
 
-  # Source 1: Archive.org Cinema & TV Series
-  local arc_results
-  arc_results=$(spin_task "Searching cinema archives for '$title'..." archive_search "$title")
-  if [ -n "$arc_results" ]; then
-    if _movies_try_archive "$arc_results" "$download_mode" "$title"; then
-      return 0
-    fi
-  fi
-
-  # Source 2: High-Definition Video Stream with Resolution Control
   local yt_suffix
   if [ -n "$season" ]; then
     yt_suffix="season $season episode $episode full episode HD"
   else
     yt_suffix=$([ -n "$year" ] && echo "$year full movie HD" || echo "full movie HD")
   fi
+
+  local src_choice
+  src_choice=$(printf "HD Stream (1080p / 4K / Best)\nArchive.org Cinema Vault (Classic & Public Domain)\n" \
+    | fzf_prompt "Select Source for '$title'")
+
+  case "$src_choice" in
+    *Archive*)
+      local arc_results
+      arc_results=$(spin_task "Searching cinema archives for '$title'..." archive_search "$title")
+      if [ -n "$arc_results" ]; then
+        _movies_try_archive "$arc_results" "$download_mode" "$title" && return 0
+      else
+        warn "No cinema archive entries found. Switching to HD stream..."
+      fi
+      ;;
+  esac
 
   _media_youtube_fallback "$title" "$download_mode" "$yt_suffix" "$content_type" "$year"
 }
