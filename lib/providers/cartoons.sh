@@ -115,65 +115,67 @@ _cartoons_play_supercartoons() {
 _cartoons_play_archive() {
   local results="$1" download_mode="$2" query="$3"
 
-  local choice
-  choice=$(printf '%s\n' "$results" | awk -F'\t' '{print $1}' | fzf_prompt "Archive.org Cartoon Series")
-  [ -z "$choice" ] && return 1
+  while true; do
+    local choice
+    choice=$(printf '%s\n' "$results" | awk -F'\t' '{print $1}' | fzf_prompt "Archive.org Cartoon Series (or ESC to skip)")
+    [ -z "$choice" ] && return 1
 
-  local id
-  id=$(printf '%s\n' "$results" | awk -F'\t' -v c="$choice" '$1==c{print $2; exit}')
-  [ -z "$id" ] && return 1
+    local id
+    id=$(printf '%s\n' "$results" | awk -F'\t' -v c="$choice" '$1==c{print $2; exit}')
+    [ -z "$id" ] && return 1
 
-  local episodes
-  episodes=$(spin_task "Loading episodes from collection..." archive_episodes "$id")
-  if [ -z "$episodes" ]; then
-    warn "No playable video episodes found in this collection."
-    return 1
-  fi
+    local episodes
+    episodes=$(spin_task "Loading episodes from collection..." archive_episodes "$id")
+    if [ -z "$episodes" ]; then
+      warn "No playable video episodes found in this collection. Please select another or press ESC."
+      continue
+    fi
 
 
-  local ep_choice
-  ep_choice=$(printf '%s\n' "$episodes" | awk -F'\t' '{print $1}' | fzf_prompt "Select episode ($choice)")
-  [ -z "$ep_choice" ] && return 1
+    local ep_choice
+    ep_choice=$(printf '%s\n' "$episodes" | awk -F'\t' '{print $1}' | fzf_prompt "Select episode ($choice)")
+    [ -z "$ep_choice" ] && continue
 
-  local ep_file
-  ep_file=$(printf '%s\n' "$episodes" | awk -F'\t' -v ec="$ep_choice" '$1==ec{print $3; exit}')
-  [ -z "$ep_file" ] && return 1
+    local ep_file
+    ep_file=$(printf '%s\n' "$episodes" | awk -F'\t' -v ec="$ep_choice" '$1==ec{print $3; exit}')
+    [ -z "$ep_file" ] && continue
 
-  local stream_url
-  stream_url=$(archive_stream "$id" "$ep_file")
+    local stream_url
+    stream_url=$(archive_stream "$id" "$ep_file")
 
-  hist_add "cartoons" "$ep_choice" ""
+    hist_add "cartoons" "$ep_choice" ""
 
-  if [ "$download_mode" = "1" ]; then
-    download_url "$stream_url" "$ep_choice"
-  else
-    info "Streaming: $ep_choice [Archive.org Direct MP4]"
-    play_url "$stream_url" "$ep_choice"
+    if [ "$download_mode" = "1" ]; then
+      download_url "$stream_url" "$ep_choice"
+    else
+      info "Streaming: $ep_choice [Archive.org Direct MP4]"
+      play_url "$stream_url" "$ep_choice"
 
-    while [ -t 0 ]; do
-      local action
-      action=$(printf 'replay\nselect another episode\nsearch again\nquit' | fzf_prompt "$ep_choice")
-      case "$action" in
-        replay)
-          play_url "$stream_url" "$ep_choice"
-          ;;
-        "select another episode")
-          ep_choice=$(printf '%s\n' "$episodes" | awk -F'\t' '{print $1}' | fzf_prompt "Select episode ($choice)")
-          [ -z "$ep_choice" ] && break
-          ep_file=$(printf '%s\n' "$episodes" | awk -F'\t' -v ec="$ep_choice" '$1==ec{print $3; exit}')
-          stream_url=$(archive_stream "$id" "$ep_file")
-          info "Streaming: $ep_choice [Archive.org Direct MP4]"
-          play_url "$stream_url" "$ep_choice"
-          ;;
-        "search again")
-          cartoons_search_and_play "" "$download_mode"
-          break
-          ;;
-        *) break ;;
-      esac
-    done
-  fi
-  return 0
+      while [ -t 0 ]; do
+        local action
+        action=$(printf 'replay\nselect another episode\nsearch again\nquit' | fzf_prompt "$ep_choice")
+        case "$action" in
+          replay)
+            play_url "$stream_url" "$ep_choice"
+            ;;
+          "select another episode")
+            ep_choice=$(printf '%s\n' "$episodes" | awk -F'\t' '{print $1}' | fzf_prompt "Select episode ($choice)")
+            [ -z "$ep_choice" ] && break
+            ep_file=$(printf '%s\n' "$episodes" | awk -F'\t' -v ec="$ep_choice" '$1==ec{print $3; exit}')
+            stream_url=$(archive_stream "$id" "$ep_file")
+            info "Streaming: $ep_choice [Archive.org Direct MP4]"
+            play_url "$stream_url" "$ep_choice"
+            ;;
+          "search again")
+            cartoons_search_and_play "" "$download_mode"
+            break
+            ;;
+          *) break ;;
+        esac
+      done
+    fi
+    return 0
+  done
 }
 
 _cartoons_play_hianime() {

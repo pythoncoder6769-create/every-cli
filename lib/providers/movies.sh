@@ -73,34 +73,7 @@ movies_search_and_play() {
     fi
   fi
 
-
-  # Source 2: Direct Embed & Streaming Resolvers
-  if [ -n "$imdb_id" ]; then
-    info "Resolving streaming embed for $title ($imdb_id)..."
-    local embed_url stream
-    if [ -n "$season" ]; then
-      embed_url="https://vidsrc.cc/v2/embed/tv/${imdb_id}/${season}/${episode}"
-    else
-      embed_url="https://vidsrc.cc/v2/embed/movie/${imdb_id}"
-    fi
-
-    stream=$(yt-dlp --no-warnings -g --format "bestvideo+bestaudio/best" --add-header "Referer: https://vidsrc.cc/" "$embed_url" 2>/dev/null)
-    if [ -n "$stream" ]; then
-      local display_title="$title"
-      [ -n "$year" ] && display_title="$display_title ($year)"
-      [ -n "$season" ] && display_title="$display_title S${season}E${episode}"
-
-      hist_add "$content_type" "$display_title" ""
-      if [ "$download_mode" = "1" ]; then
-        download_url "$stream" "$display_title" "https://vidsrc.cc/"
-      else
-        play_url "$stream" "$display_title" "https://vidsrc.cc/"
-      fi
-      return 0
-    fi
-  fi
-
-  # Source 3: Universal High-Definition Video Stream with Resolution Control
+  # Source 2: High-Definition Video Stream with Resolution Control
   local yt_suffix
   if [ -n "$season" ]; then
     yt_suffix="season $season episode $episode full episode HD"
@@ -114,40 +87,45 @@ movies_search_and_play() {
 _movies_try_archive() {
   local results="$1" download_mode="$2" title="$3"
 
-  local choice
-  choice=$(printf '%s\n' "$results" | awk -F'\t' '{print $1}' | fzf_prompt "Archive.org Cinema (or ESC to skip)")
-  [ -z "$choice" ] && return 1
+  while true; do
+    local choice
+    choice=$(printf '%s\n' "$results" | awk -F'\t' '{print $1}' | fzf_prompt "Archive.org Cinema (or ESC to skip to HD streams)")
+    [ -z "$choice" ] && return 1
 
-  local id
-  id=$(printf '%s\n' "$results" | awk -F'\t' -v c="$choice" '$1==c{print $2; exit}')
-  [ -z "$id" ] && return 1
+    local id
+    id=$(printf '%s\n' "$results" | awk -F'\t' -v c="$choice" '$1==c{print $2; exit}')
+    [ -z "$id" ] && return 1
 
-  local episodes
-  episodes=$(spin_task "Loading video tracks for $choice..." archive_episodes "$id")
-  [ -z "$episodes" ] && return 1
+    local episodes
+    episodes=$(spin_task "Loading video tracks for $choice..." archive_episodes "$id")
+    if [ -z "$episodes" ]; then
+      warn "No playable video tracks found in this collection. Please select another or press ESC."
+      continue
+    fi
 
-  local ep_file
-  if [ $(printf '%s\n' "$episodes" | wc -l) -gt 1 ]; then
-    local ep_choice
-    ep_choice=$(printf '%s\n' "$episodes" | awk -F'\t' '{print $1}' | fzf_prompt "Select track ($choice)")
-    [ -z "$ep_choice" ] && return 1
-    ep_file=$(printf '%s\n' "$episodes" | awk -F'\t' -v ec="$ep_choice" '$1==ec{print $3; exit}')
-  else
-    ep_file=$(printf '%s\n' "$episodes" | head -n 1 | cut -f3)
-  fi
-  [ -z "$ep_file" ] && return 1
+    local ep_file
+    if [ $(printf '%s\n' "$episodes" | wc -l) -gt 1 ]; then
+      local ep_choice
+      ep_choice=$(printf '%s\n' "$episodes" | awk -F'\t' '{print $1}' | fzf_prompt "Select track ($choice)")
+      [ -z "$ep_choice" ] && continue
+      ep_file=$(printf '%s\n' "$episodes" | awk -F'\t' -v ec="$ep_choice" '$1==ec{print $3; exit}')
+    else
+      ep_file=$(printf '%s\n' "$episodes" | head -n 1 | cut -f3)
+    fi
+    [ -z "$ep_file" ] && continue
 
-  local stream_url
-  stream_url=$(archive_stream "$id" "$ep_file")
+    local stream_url
+    stream_url=$(archive_stream "$id" "$ep_file")
 
-  hist_add "movies" "$choice" ""
+    hist_add "movies" "$choice" ""
 
-  if [ "$download_mode" = "1" ]; then
-    download_url "$stream_url" "$choice"
-  else
-    play_url "$stream_url" "$choice"
-  fi
-  return 0
+    if [ "$download_mode" = "1" ]; then
+      download_url "$stream_url" "$choice"
+    else
+      play_url "$stream_url" "$choice"
+    fi
+    return 0
+  done
 }
 
 

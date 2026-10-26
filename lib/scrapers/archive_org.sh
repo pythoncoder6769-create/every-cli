@@ -10,7 +10,7 @@ archive_search() {
   local encoded
   encoded=$(printf '%s' "$query" | sed 's/ /+/g')
 
-  local url="${ARCHIVE_SEARCH_API}?q=title:(%22${encoded}%22)+AND+mediatype:(movies)&fl[]=identifier,title,downloads&sort[]=downloads+desc&rows=20&output=json"
+  local url="${ARCHIVE_SEARCH_API}?q=title:(%22${encoded}%22)+AND+mediatype:(movies)+AND+format:(%22h.264%22+OR+%22mp4%22+OR+%22Matroska%22+OR+%22512Kb+MPEG4%22)&fl[]=identifier,title,downloads&sort[]=downloads+desc&rows=20&output=json"
 
   local json
   json=$(do_curl --connect-timeout 6 --max-time 12 "$url")
@@ -47,7 +47,8 @@ archive_episodes() {
     BEGIN { RS="\"name\":\"" }
     NR > 1 {
       file = $0; sub(/".*/, "", file)
-      if (file ~ /\.(mp4|mkv|m4v|avi|webm)$/ && file !~ /_sample\./ && file !~ /_trailer\./ && file !~ /_512kb\./) {
+      lfile = tolower(file)
+      if (lfile ~ /\.(mp4|mkv|m4v|avi|webm)$/ && lfile !~ /sample/ && lfile !~ /trailer/ && lfile !~ /_512kb\./) {
         title = file
         sub(/.*\//, "", title)
         sub(/\.[^.]*$/, "", title)

@@ -1,7 +1,6 @@
 #!/bin/sh
 # every-cli — stream everything for free
 # GPL-3.0 | https://github.com/pythoncoder6769-create/every-cli
-set -e
 
 VERSION="1.0.0"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
