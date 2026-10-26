@@ -84,7 +84,7 @@ movies_search_and_play() {
       embed_url="https://vidsrc.cc/v2/embed/movie/${imdb_id}"
     fi
 
-    stream=$(yt-dlp --no-warnings -g --add-header "Referer: https://vidsrc.cc/" "$embed_url" 2>/dev/null | head -n 1)
+    stream=$(yt-dlp --no-warnings -g --format "bestvideo+bestaudio/best" --add-header "Referer: https://vidsrc.cc/" "$embed_url" 2>/dev/null)
     if [ -n "$stream" ]; then
       local display_title="$title"
       [ -n "$year" ] && display_title="$display_title ($year)"

@@ -32,8 +32,9 @@ vidsrc_resolve() {
   local stream
 
   stream=$(yt-dlp --no-warnings -g \
+    --format "bestvideo+bestaudio/best" \
     --add-header "Referer:$VIDSRC_BASE/" \
-    "$embed_url" 2>/dev/null | tr -d '\r' | head -1)
+    "$embed_url" 2>/dev/null | tr -d '\r')
 
   [ -n "$stream" ] && printf '%s' "$stream" && return 0
   return 1

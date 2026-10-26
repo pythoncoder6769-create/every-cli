@@ -62,26 +62,30 @@ spin_task() {
 }
 
 random_tip() {
-  local count=12
+  local count=15
   local rand
-  if [ -n "$RANDOM" ]; then
-    rand=$(( (RANDOM % count) + 1 ))
-  else
-    rand=$(( ( $(date +%s) % count ) + 1 ))
-  fi
+  # Mix multiple entropy sources for genuine randomness on every call
+  local seed
+  seed=$(( ${RANDOM:-0} + $$ + $(date +%s) + ${SRANDOM:-$(od -An -N2 -tu2 /dev/urandom 2>/dev/null | tr -d ' ' || echo 0)} ))
+  rand=$(( (seed % count) + 1 ))
+  # Ensure positive
+  [ "$rand" -lt 1 ] && rand=$(( (-rand % count) + 1 ))
   cat <<'EOF' | sed -n "${rand}p"
-Tip: Use -d to download any stream directly to your drive
-Tip: Pass -q 1080 to stream directly in Full HD
-Tip: Pass --dub to default anime to English dubbing
-Tip: SuperCartoons hosts 1,500+ retro cartoons in direct MP4
-Tip: Press ESC in any fzf menu to go back or cancel
-Tip: Resume where you left off anytime with every-cli --continue
-Tip: Select 'Audio Only' to stream YouTube music & podcasts
-Tip: MPV GPU hardware acceleration is automatically active
-Tip: Archive.org features complete cartoon series (Ben 10, Batman)
-Tip: IPTV browser gives you 8,000+ live international channels
-Tip: HiAnime provides 1080p stream resolution with dual audio
-Tip: Type any partial word in fzf for instant fuzzy search
+Use -d to download any stream directly to your drive
+Quality is set to maximum by default — always the best available
+Pass --dub to default anime to English dubbing
+SuperCartoons hosts 1,500+ retro cartoons in direct MP4
+Press ESC in any fzf menu to go back or cancel
+Resume where you left off anytime with every-cli --continue
+Select 'Audio Only' to stream YouTube music & podcasts
+MPV GPU hardware acceleration is automatically active
+Archive.org features complete cartoon series (Ben 10, Batman)
+IPTV browser gives you 8,000+ live international channels
+HiAnime provides 1080p stream resolution with dual audio
+Type any partial word in fzf for instant fuzzy search
+Press 'f' in mpv to toggle fullscreen, '#' to switch audio tracks
+Press '[' and ']' in mpv to change playback speed
+Use -c anime --dub -q 1080 to skip all menus and go direct
 EOF
 }
 
@@ -233,21 +237,22 @@ fzf_select() {
 prompt_quality() {
   local prompt_label="${1:-Select Video Quality}"
   if [ "${QUALITY_GIVEN:-0}" = "1" ]; then
-    printf '%s' "${EVERY_CLI_QUALITY:-1080}"
+    printf '%s' "${EVERY_CLI_QUALITY:-best}"
     return 0
   fi
-  [ ! -t 0 ] && printf '1080' && return 0
+  [ ! -t 0 ] && printf 'best' && return 0
 
   local chosen
-  chosen=$(printf '1080p Full HD (1920x1080)\n720p  HD (1280x720)\n480p  SD (854x480)\n360p  Low (640x360)\nAudio Only (Music / Podcast)\n' \
+  chosen=$(printf 'Best Available (highest resolution)\n1080p Full HD (1920x1080)\n720p  HD (1280x720)\n480p  SD (854x480)\n360p  Low (640x360)\nAudio Only (Music / Podcast)\n' \
     | fzf_prompt "$prompt_label")
   case "$chosen" in
-    *1080*) printf '1080' ;;
-    *720*)  printf '720' ;;
-    *480*)  printf '480' ;;
-    *360*)  printf '360' ;;
+    *Best*)  printf 'best' ;;
+    *1080*)  printf '1080' ;;
+    *720*)   printf '720' ;;
+    *480*)   printf '480' ;;
+    *360*)   printf '360' ;;
     *Audio*) printf 'audio' ;;
-    *)      printf '1080' ;;
+    *)       printf 'best' ;;
   esac
 }
 
@@ -258,15 +263,17 @@ play_url() {
   local mpv_bin
   mpv_bin=$(_find_mpv)
   mpv_bin="${mpv_bin:-mpv}"
-  local quality="${EVERY_CLI_QUALITY:-1080}"
+  local quality="${EVERY_CLI_QUALITY:-best}"
   local ytdl_fmt=""
   local extra_mpv=""
   case "$quality" in
-    1080|best|*) ytdl_fmt="--ytdl-format=bestvideo[height<=?1080]+bestaudio/best[height<=?1080]/best" ;;
-    720)         ytdl_fmt="--ytdl-format=bestvideo[height<=?720]+bestaudio/best[height<=?720]/best" ;;
-    480)         ytdl_fmt="--ytdl-format=bestvideo[height<=?480]+bestaudio/best[height<=?480]/best" ;;
-    360)         ytdl_fmt="--ytdl-format=bestvideo[height<=?360]+bestaudio/best[height<=?360]/best" ;;
-    audio)       extra_mpv="--no-video"; ytdl_fmt="--ytdl-format=bestaudio/best" ;;
+    best)  ytdl_fmt="--ytdl-format=bestvideo+bestaudio/best" ;;
+    1080)  ytdl_fmt="--ytdl-format=bestvideo[height<=?1080]+bestaudio/best[height<=?1080]/best" ;;
+    720)   ytdl_fmt="--ytdl-format=bestvideo[height<=?720]+bestaudio/best[height<=?720]/best" ;;
+    480)   ytdl_fmt="--ytdl-format=bestvideo[height<=?480]+bestaudio/best[height<=?480]/best" ;;
+    360)   ytdl_fmt="--ytdl-format=bestvideo[height<=?360]+bestaudio/best[height<=?360]/best" ;;
+    audio) extra_mpv="--no-video"; ytdl_fmt="--ytdl-format=bestaudio/best" ;;
+    *)     ytdl_fmt="--ytdl-format=bestvideo+bestaudio/best" ;;
   esac
 
   printf "${C_GRN}[+]${C_RST} Playing: ${C_BLD}%s${C_RST} ${C_YLW}(press 'q' in player to return)${C_RST}\n" "$title"
@@ -274,6 +281,7 @@ play_url() {
   case "$player" in
     mpv)
       "$mpv_bin" --really-quiet --hwdec=auto \
+        --demuxer-max-bytes=150M \
         ${extra_mpv:+"$extra_mpv"} \
         ${ytdl_fmt:+"$ytdl_fmt"} \
         ${refr:+--referrer="$refr"} \
@@ -305,25 +313,37 @@ resolve_stream() {
   local quality="${EVERY_CLI_QUALITY:-best}"
   local fmt
   case "$quality" in
-    1080) fmt="bestvideo[height<=1080]+bestaudio/best[height<=1080]/best" ;;
-    720)  fmt="bestvideo[height<=720]+bestaudio/best[height<=720]/best" ;;
-    480)  fmt="bestvideo[height<=480]+bestaudio/best[height<=480]/best" ;;
-    360)  fmt="bestvideo[height<=360]+bestaudio/best[height<=360]/best" ;;
-    *)    fmt="bestvideo+bestaudio/best" ;;
+    best)  fmt="bestvideo+bestaudio/best" ;;
+    1080)  fmt="bestvideo[height<=1080]+bestaudio/best[height<=1080]/best" ;;
+    720)   fmt="bestvideo[height<=720]+bestaudio/best[height<=720]/best" ;;
+    480)   fmt="bestvideo[height<=480]+bestaudio/best[height<=480]/best" ;;
+    360)   fmt="bestvideo[height<=360]+bestaudio/best[height<=360]/best" ;;
+    *)     fmt="bestvideo+bestaudio/best" ;;
   esac
-  yt-dlp --no-warnings -g --format "$fmt" "$url" 2>/dev/null | tr -d '\r' | head -1
+  # Return all stream URLs (video + audio) so mpv can merge them
+  yt-dlp --no-warnings -g --format "$fmt" "$url" 2>/dev/null | tr -d '\r'
 }
 
 # ── Download ──────────────────────────────────────────────────────────────────
 download_url() {
   local url="$1" title="${2:-video}" refr="${3:-}" sub="${4:-}"
   local out_dir="${EVERY_CLI_DOWNLOAD_DIR:-$HOME/Videos/every-cli}"
+  local quality="${EVERY_CLI_QUALITY:-best}"
+  local fmt
+  case "$quality" in
+    best)  fmt="bestvideo+bestaudio/best" ;;
+    1080)  fmt="bestvideo[height<=1080]+bestaudio/best[height<=1080]/best" ;;
+    720)   fmt="bestvideo[height<=720]+bestaudio/best[height<=720]/best" ;;
+    480)   fmt="bestvideo[height<=480]+bestaudio/best[height<=480]/best" ;;
+    360)   fmt="bestvideo[height<=360]+bestaudio/best[height<=360]/best" ;;
+    *)     fmt="bestvideo+bestaudio/best" ;;
+  esac
   mkdir -p "$out_dir"
-  info "Downloading to: $out_dir"
+  info "Downloading to: $out_dir (quality: $quality)"
   yt-dlp --no-warnings \
          ${refr:+--referer "$refr"} \
          -o "$out_dir/%(title)s.%(ext)s" \
-         --format "bestvideo+bestaudio/best" \
+         --format "$fmt" \
          --merge-output-format mp4 \
          "$url"
 }

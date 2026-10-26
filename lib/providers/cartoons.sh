@@ -206,8 +206,11 @@ _cartoons_play_hianime() {
   EVERY_CLI_QUALITY="$quality"
 
   info "Fetching episode $ep_num of $choice ($lang, $quality)..."
-  local stream
-  stream=$(hianime_stream "$ep_id" "$lang" "$quality")
+  local stream_info stream refr sub
+  stream_info=$(hianime_get_stream "$ep_id" "$lang" "$quality")
+  stream=$(printf '%s' "$stream_info" | cut -f1)
+  refr=$(printf '%s' "$stream_info" | cut -f2)
+  sub=$(printf '%s' "$stream_info" | cut -f3)
 
   if [ -z "$stream" ]; then
     warn "Could not resolve stream on HiAnime."
@@ -217,9 +220,9 @@ _cartoons_play_hianime() {
   hist_add "cartoons" "$choice" "$ep_num"
 
   if [ "$download_mode" = "1" ]; then
-    download_url "$stream" "${choice} E${ep_num}" "https://megacloud.blog/"
+    download_url "$stream" "${choice} E${ep_num}" "$refr" "$sub"
   else
-    play_url "$stream" "${choice} — Episode ${ep_num}" "https://megacloud.blog/"
+    play_url "$stream" "${choice} — Episode ${ep_num}" "$refr" "$sub"
   fi
   return 0
 }

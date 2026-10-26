@@ -49,6 +49,8 @@ EPISODE=""
 DOWNLOAD=0
 LANG="${EVERY_CLI_LANG:-sub}"
 QUALITY="${EVERY_CLI_QUALITY:-best}"
+EVERY_CLI_QUALITY="${EVERY_CLI_QUALITY:-best}"
+export EVERY_CLI_QUALITY
 
 usage() {
   cat <<EOF
@@ -110,7 +112,7 @@ show_banner() {
   local tip
   tip=$(random_tip)
   printf "\n${C_BLD}${C_CYN}  every-cli v%s${C_RST} ${C_BLU}─${C_RST} ${C_BLD}Terminal Media Center${C_RST}\n" "$VERSION"
-  printf "  ${C_YLW}%s${C_RST}\n\n" "$tip"
+  printf "  ${C_YLW}Tip: %s${C_RST}\n\n" "$tip"
 }
 
 

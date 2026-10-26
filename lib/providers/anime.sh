@@ -7,7 +7,6 @@
 anime_search_and_play() {
   local query="$1" ep_arg="$2" lang="${EVERY_CLI_LANG:-sub}" download_mode="$3"
   local quality="${EVERY_CLI_QUALITY:-best}"
-
   if [ -z "$query" ]; then
     printf "${C_CYN}  Search Anime ❯${C_RST} "
     read -r query
@@ -95,9 +94,10 @@ _anime_play_hianime() {
   # Quality selection prompt if not explicitly passed via flag
   if [ "${QUALITY_GIVEN:-0}" != "1" ] && [ -t 0 ]; then
     local quality_choice
-    quality_choice=$(printf "best (1080p / highest)\n1080p\n720p\n480p\n360p\n" \
+    quality_choice=$(printf "best (highest available)\n1080p\n720p\n480p\n360p\n" \
       | fzf_prompt "Select video quality")
     case "$quality_choice" in
+      *best*)  quality="best" ;;
       *1080*) quality="1080" ;;
       *720*)  quality="720" ;;
       *480*)  quality="480" ;;
@@ -169,8 +169,9 @@ _anime_play_hianime() {
         ;;
       "change quality")
         local new_q
-        new_q=$(printf "best (1080p / highest)\n1080p\n720p\n480p\n360p\n" | fzf_prompt "Select quality")
+        new_q=$(printf "best (highest available)\n1080p\n720p\n480p\n360p\n" | fzf_prompt "Select quality")
         case "$new_q" in
+          *best*)  quality="best" ;;
           *1080*) quality="1080" ;;
           *720*)  quality="720" ;;
           *480*)  quality="480" ;;
