@@ -4,23 +4,24 @@
 
 # ── Colours ──────────────────────────────────────────────────────────────────
 if [ "${EVERY_CLI_COLOR:-1}" = "1" ] && [ -t 1 ]; then
-  C_RST='\033[0m'
-  C_BLD='\033[1m'
-  C_DIM='\033[2m'
-  C_ITA='\033[3m'
-  C_UND='\033[4m'
-  C_REV='\033[7m'
+  _ESC="$(printf '\033')"
+  C_RST="${_ESC}[0m"
+  C_BLD="${_ESC}[1m"
+  C_DIM="${_ESC}[2m"
+  C_ITA="${_ESC}[3m"
+  C_UND="${_ESC}[4m"
+  C_REV="${_ESC}[7m"
 
   # Modern 256-color palette (Claude Code / OpenCode aesthetic)
-  C_PRI='\033[38;5;141m'  # Violet / Purple accent
-  C_CYN='\033[38;5;45m'   # Electric Cyan / Sky
-  C_GRN='\033[38;5;48m'   # Vibrant Emerald Green
-  C_YLW='\033[38;5;220m'  # Warm Amber Gold
-  C_RED='\033[38;5;203m'  # Coral Red
-  C_MAG='\033[38;5;213m'  # Soft Magenta
-  C_BLU='\033[38;5;75m'   # Royal Blue
-  C_MUT='\033[38;5;243m'  # Slate Gray / Border
-  C_WHT='\033[38;5;255m'  # Crisp Pure White
+  C_PRI="${_ESC}[38;5;141m"  # Violet / Purple accent
+  C_CYN="${_ESC}[38;5;45m"   # Electric Cyan / Sky
+  C_GRN="${_ESC}[38;5;48m"   # Vibrant Emerald Green
+  C_YLW="${_ESC}[38;5;220m"  # Warm Amber Gold
+  C_RED="${_ESC}[38;5;203m"  # Coral Red
+  C_MAG="${_ESC}[38;5;213m"  # Soft Magenta
+  C_BLU="${_ESC}[38;5;75m"   # Royal Blue
+  C_MUT="${_ESC}[38;5;243m"  # Slate Gray / Border
+  C_WHT="${_ESC}[38;5;255m"  # Crisp Pure White
 else
   C_RST=''; C_BLD=''; C_DIM=''; C_ITA=''; C_UND=''; C_REV=''
   C_PRI=''; C_CYN=''; C_GRN=''; C_YLW=''; C_RED=''; C_MAG=''; C_BLU=''; C_MUT=''; C_WHT=''

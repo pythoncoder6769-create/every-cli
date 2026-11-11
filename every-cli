@@ -114,17 +114,14 @@ show_banner() {
   [ "${EVERY_CLI_COLOR:-1}" = "0" ] && return
   local tip
   tip=$(random_tip)
-  cat <<EOF
-
-  ${C_PRI} _____ _  _____ _ __ _   _       ___| (_)${C_RST}
-  ${C_PRI}/ _ \\ | / / _ \\ '__| | | |_____ / __| | |${C_RST}
-  ${C_CYN}|  __/ |/ /  __/ |  | |_| |_____| (__| | |${C_RST}  ${C_MUT}v${VERSION}${C_RST}
-  ${C_CYN} \\___|___/ \\___|_|   \\__, |      \\___|_|_|${C_RST}
-  ${C_CYN}                     |___/                ${C_RST}
-
-  ${C_MUT}💡 Tip:${C_RST} ${C_YLW}${tip}${C_RST}
-
-EOF
+  printf "\n"
+  printf "  %s███████╗██╗   ██╗███████╗██████╗ ██╗   ██╗      ██████╗██╗     ██╗%s\n" "$C_PRI" "$C_RST"
+  printf "  %s██╔════╝██║   ██║██╔════╝██╔══██╗╚██╗ ██╔╝     ██╔════╝██║     ██║%s\n" "$C_PRI" "$C_RST"
+  printf "  %s█████╗  ██║   ██║█████╗  ██████╔╝ ╚████╔╝█████╗██║     ██║     ██║%s\n" "$C_PRI" "$C_RST"
+  printf "  %s██╔══╝  ╚██╗ ██╔╝██╔══╝  ██╔══██╗  ╚██╔╝ ╚════╝██║     ██║     ██║%s\n" "$C_CYN" "$C_RST"
+  printf "  %s███████╗ ╚████╔╝ ███████╗██║  ██║   ██║        ╚██████╗███████╗██║%s\n" "$C_CYN" "$C_RST"
+  printf "  %s╚══════╝  ╚═══╝  ╚══════╝╚═╝  ╚═╝   ╚═╝         ╚═════╝╚══════╝╚═╝%s  %sv%s%s\n\n" "$C_MUT" "$C_RST" "$C_MUT" "$VERSION" "$C_RST"
+  printf "  %s💡 Tip:%s %s%s%s\n\n" "$C_MUT" "$C_RST" "$C_YLW" "$tip" "$C_RST"
 }
 
 
