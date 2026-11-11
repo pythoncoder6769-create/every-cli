@@ -16,26 +16,35 @@ if [ -n "$LIB_DIR" ] && [ -f "$LIB_DIR/core.sh" ]; then
   [ -f "$LIB_DIR/scrapers/yt_search.sh" ] && . "$LIB_DIR/scrapers/yt_search.sh"
 fi
 
-# ── Audio player with Drift Terminal UI (Artwork & Synced Lyrics) ─────────────
+# ── Audio player with Terminal UI (Cover Art & Synced Lyrics) ─────────────────
 play_audio() {
   local url="$1" title="${2:-Music}" refr="${3:-}"
   local mpv_bin
   mpv_bin=$(_find_mpv)
   mpv_bin="${mpv_bin:-mpv}"
 
-  local drift_py=""
-  if [ -n "$LIB_DIR" ] && [ -f "$LIB_DIR/drift_player.py" ]; then
-    drift_py="$LIB_DIR/drift_player.py"
-  elif [ -f "$(dirname "$0")/../drift_player.py" ]; then
-    drift_py="$(dirname "$0")/../drift_player.py"
+  local music_py=""
+  if [ -n "$LIB_DIR" ] && [ -f "$LIB_DIR/music_player.py" ]; then
+    music_py="$LIB_DIR/music_player.py"
+  elif [ -f "$(dirname "$0")/../music_player.py" ]; then
+    music_py="$(dirname "$0")/../music_player.py"
   fi
 
-  # Launch the Drift Terminal UI with TrueColor cover art & synchronized lyrics
-  if [ -n "$drift_py" ] && command -v python >/dev/null 2>&1; then
-    python "$drift_py" "$url" "$title"
-    return $?
-  elif [ -n "$drift_py" ] && command -v python3 >/dev/null 2>&1; then
-    python3 "$drift_py" "$url" "$title"
+  local py_cmd=""
+  if command -v python >/dev/null 2>&1; then
+    py_cmd="python"
+  elif command -v python3 >/dev/null 2>&1; then
+    py_cmd="python3"
+  elif command -v py >/dev/null 2>&1; then
+    py_cmd="py"
+  fi
+
+  # Launch the Terminal Music UI with TrueColor cover art & synchronized lyrics
+  if [ -n "$music_py" ] && [ -n "$py_cmd" ]; then
+    if command -v cygpath >/dev/null 2>&1; then
+      music_py=$(cygpath -w "$music_py" 2>/dev/null || printf '%s' "$music_py")
+    fi
+    "$py_cmd" "$music_py" "$url" "$title"
     return $?
   fi
 

@@ -101,10 +101,10 @@ Type any partial word in fzf for instant fuzzy search
 Press 'f' in mpv to toggle fullscreen, '#' to switch audio tracks
 Press '[' and ']' in mpv to change playback speed
 Use -c anime --dub -q 1080 to skip all menus and go direct
-Use -c music to stream with Drift album artwork & live synced lyrics
+Use -c music to stream with album artwork & live synced lyrics
 Use -c music -d to download any song as high-quality MP3
 Music mode: press 9/0 for volume, SPACE to pause, m to mute
-Drift engine displays live synchronized lyrics line-by-line as it's sung
+Music player displays live synchronized lyrics line-by-line as it's sung
 Music view renders photorealistic TrueColor 24-bit album artwork
 EOF
 }
@@ -232,10 +232,11 @@ fzf_prompt() {
   local fzf_bin
   fzf_bin=$(_find_fzf)
   fzf_bin="${fzf_bin:-fzf}"
+  [ $# -gt 0 ] && shift
   "$fzf_bin" \
       --prompt="  $prompt_text ❯ " \
-      --pointer="  ❯" \
-      --marker="✔ " \
+      --pointer="❯ " \
+      --marker="* " \
       --height=65% \
       --layout=reverse \
       --border=rounded \
@@ -245,7 +246,8 @@ fzf_prompt() {
       --no-sort \
       --header=" [ENTER] Select   [ESC] Back   [CTRL-C] Quit" \
       --header-first \
-      --color='prompt:bold:cyan,pointer:bold:magenta,border:240,label:bold:yellow,header:italic:245,info:yellow,hl:bold:green,hl+:bold:green,fg+:bold:white'
+      --color='prompt:bold:cyan,pointer:bold:magenta,border:240,label:bold:yellow,header:italic:245,info:yellow,hl:bold:green,hl+:bold:green,fg+:bold:white' \
+      "$@"
 }
 
 fzf_select() {

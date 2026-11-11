@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
-lib/drift_player.py — Drift-inspired Terminal Music Player for every-cli
-Inspired by Drift (https://github.com/socatlolmeow/drift)
+lib/music_player.py — Native Terminal Music Player for every-cli
 
 Features:
 - TrueColor (24-bit) halfblock album cover art (▀) directly in the terminal
@@ -248,10 +247,10 @@ def fmt_time(seconds):
     s = int(seconds) % 60
     return f"{m:02d}:{s:02d}"
 
-# ── Main Drift Terminal Player ────────────────────────────────────────────────
+# ── Main Terminal Music Player ────────────────────────────────────────────────
 def main():
     if len(sys.argv) < 2:
-        print("Usage: drift_player.py <URL> [TITLE]")
+        print("Usage: music_player.py <URL> [TITLE]")
         sys.exit(1)
 
     url = sys.argv[1]
@@ -278,9 +277,9 @@ def main():
     # Setup MPV IPC
     pid = os.getpid()
     if IS_WIN:
-        pipe_path = rf'\\.\pipe\mpv_drift_{pid}'
+        pipe_path = rf'\\.\pipe\mpv_music_{pid}'
     else:
-        pipe_path = f'/tmp/mpv_drift_{pid}.sock'
+        pipe_path = f'/tmp/mpv_music_{pid}.sock'
 
     mpv_bin = find_mpv()
     mpv_cmd = [
@@ -511,7 +510,7 @@ def main():
 
             # Top Header Bar
             buf.append("  \033[38;5;243m╭────────────────────────────────────────────────────────────────────────╮\033[0m")
-            buf.append("  \033[38;5;243m│\033[0m  \033[38;5;141m♪\033[0m \033[1;37mevery-cli\033[0m \033[38;5;243m• Drift Player\033[0m           \033[38;5;48m● 320kbps Audio (Max Quality)\033[0m  \033[38;5;243m│\033[0m")
+            buf.append("  \033[38;5;243m│\033[0m  \033[38;5;141m♪\033[0m \033[1;37mevery-cli\033[0m \033[38;5;243m• Music Player\033[0m           \033[38;5;48m● 320kbps Audio (Max Quality)\033[0m  \033[38;5;243m│\033[0m")
             buf.append("  \033[38;5;243m╰────────────────────────────────────────────────────────────────────────╯\033[0m")
 
             # Main Body: Cover Art (Left) & Lyrics (Right)
