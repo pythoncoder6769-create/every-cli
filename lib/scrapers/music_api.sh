@@ -29,10 +29,11 @@ music_yt_search() {
       else views_fmt = ""
       dur = ($3 != "" && $3 != "NA") ? $3 : "--:--"
       ch = ($5 != "" && $5 != "NA") ? $5 : ""
+      gsub(/ - Topic$| VEVO$| Official$| Records$/, "", ch)
       meta = dur
       if (ch != "") meta = meta " • " ch
       if (views_fmt != "") meta = meta ", " views_fmt
-      printf "%s [%s]%s%s\n", $1, meta, tab, $2
+      printf "%s [%s]%s%s%s%s%s%s\n", $1, meta, tab, $2, tab, $1, tab, ch
     }'
 }
 

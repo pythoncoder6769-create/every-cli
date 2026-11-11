@@ -18,7 +18,7 @@ fi
 
 # ── Audio player with Terminal UI (Cover Art & Synced Lyrics) ─────────────────
 play_audio() {
-  local url="$1" title="${2:-Music}" refr="${3:-}"
+  local url="$1" title="${2:-Music}" artist="${3:-}" refr="${4:-}"
   local mpv_bin
   mpv_bin=$(_find_mpv)
   mpv_bin="${mpv_bin:-mpv}"
@@ -44,7 +44,7 @@ play_audio() {
     if command -v cygpath >/dev/null 2>&1; then
       music_py=$(cygpath -w "$music_py" 2>/dev/null || printf '%s' "$music_py")
     fi
-    "$py_cmd" "$music_py" "$url" "$title"
+    "$py_cmd" "$music_py" "$url" "$title" "$artist"
     return $?
   fi
 
@@ -123,8 +123,15 @@ music_search_and_play() {
     | fzf_prompt "Select Track")
   [ -z "$selected" ] && return
 
-  local yt_url
-  yt_url=$(printf '%s\n' "$results" | awk -F'\t' -v s="$selected" '$1==s{print $2; exit}')
+  local match_line
+  match_line=$(printf '%s\n' "$results" | awk -F'\t' -v s="$selected" '$1==s{print; exit}')
+  [ -z "$match_line" ] && return
+
+  local yt_url clean_title artist_name
+  yt_url=$(printf '%s' "$match_line" | awk -F'\t' '{print $2}')
+  clean_title=$(printf '%s' "$match_line" | awk -F'\t' '{print $3}')
+  artist_name=$(printf '%s' "$match_line" | awk -F'\t' '{print $4}')
+  [ -z "$clean_title" ] && clean_title="$selected"
   [ -z "$yt_url" ] && return
 
   # For lyrics mode, play with video (lyrics are in the video)
@@ -139,7 +146,7 @@ music_search_and_play() {
     play_url "$yt_url" "$selected"
   else
     hist_add "music" "$selected" ""
-    play_audio "$yt_url" "$selected"
+    play_audio "$yt_url" "$clean_title" "$artist_name"
   fi
 
   # Download mode stops after downloading
@@ -161,7 +168,7 @@ music_search_and_play() {
         if [ "$is_lyrics" = "1" ]; then
           play_url "$yt_url" "$selected"
         else
-          play_audio "$yt_url" "$selected"
+          play_audio "$yt_url" "$clean_title" "$artist_name"
         fi
         ;;
       *Search*)
@@ -173,19 +180,23 @@ music_search_and_play() {
         ;;
       *Queue*)
         # Play next unplayed track from the results list
-        local next_track next_url
-        next_track=$(printf '%s\n' "$results" \
-          | awk -F'\t' '{print $1}' \
-          | awk -v played="$selected" 'found{print; exit} $0==played{found=1}')
-        if [ -z "$next_track" ]; then
+        local next_line next_track next_url next_title next_artist
+        next_line=$(printf '%s\n' "$results" \
+          | awk -F'\t' -v played="$selected" 'found{print; exit} $1==played{found=1}')
+        if [ -z "$next_line" ]; then
           warn "No more tracks in results."
           continue
         fi
-        next_url=$(printf '%s\n' "$results" | awk -F'\t' -v s="$next_track" '$1==s{print $2; exit}')
+        next_track=$(printf '%s' "$next_line" | awk -F'\t' '{print $1}')
+        next_url=$(printf '%s' "$next_line" | awk -F'\t' '{print $2}')
+        next_title=$(printf '%s' "$next_line" | awk -F'\t' '{print $3}')
+        next_artist=$(printf '%s' "$next_line" | awk -F'\t' '{print $4}')
         selected="$next_track"
         yt_url="$next_url"
+        clean_title="$next_title"
+        artist_name="$next_artist"
         hist_add "music" "$selected" ""
-        play_audio "$yt_url" "$selected"
+        play_audio "$yt_url" "$clean_title" "$artist_name"
         ;;
       *)
         break
