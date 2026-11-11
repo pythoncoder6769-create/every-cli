@@ -32,6 +32,16 @@ else:
     import select
     import termios
     import tty
+    import signal
+
+winch_resized = [False]
+if not IS_WIN and hasattr(signal, 'SIGWINCH'):
+    def _sigwinch_handler(signum, frame):
+        winch_resized[0] = True
+    try:
+        signal.signal(signal.SIGWINCH, _sigwinch_handler)
+    except:
+        pass
 
 def get_key():
     if IS_WIN:
@@ -455,9 +465,9 @@ def main():
         orig_settings = termios.tcgetattr(sys.stdin)
         tty.setcbreak(sys.stdin.fileno())
 
-    # Hide cursor and initial screen clear
+    # Enter Alternate Screen Buffer & hide cursor
     if sys.stdout.isatty():
-        sys.stdout.write('\033[?25l\033[2J\033[H')
+        sys.stdout.write('\033[?1049h\033[?25l\033[2J\033[H')
         sys.stdout.flush()
 
     try:
@@ -467,6 +477,7 @@ def main():
         paused = False
         plain_scroll_idx = 0
         last_sec = -1
+        last_term_size = (0, 0)
 
         while proc.poll() is None:
             # Poll MPV status
@@ -511,8 +522,19 @@ def main():
             # ── Dynamic Responsive Dimensions ────────────────────────────────
             term_w, term_h = shutil.get_terminal_size((96, 28))
 
+            # Detect terminal resize and wipe frame buffer cleanly
+            is_resized = ((term_w, term_h) != last_term_size) or winch_resized[0]
+            if is_resized:
+                winch_resized[0] = False
+                last_term_size = (term_w, term_h)
+                sys.stdout.write('\033[2J\033[H')
+                sys.stdout.flush()
+
             # Constrain total target width to fit terminal comfortably
             target_w = min(120, max(74, term_w - 4))
+
+            # Prevent frame from exceeding terminal height (avoids scrollback spill)
+            max_box_rows = max(6, term_h - 11)
 
             # Calculate album art dimensions (proportional square in terminal halfblocks)
             if term_h >= 34 and target_w >= 110:
@@ -528,10 +550,11 @@ def main():
                 art_cols = 24
                 art_rows = 12
 
-            # Lyrics box consumes the remaining width
-            lyrics_cols = target_w - art_cols - 7
-            lyrics_cols = max(36, lyrics_cols)
+            art_rows = min(max_box_rows, art_rows)
             box_rows = art_rows
+
+            # Lyrics box consumes the remaining width
+            lyrics_cols = max(36, target_w - art_cols - 7)
 
             # Render Album Cover Art lines
             cover_lines = cover_mgr.render(art_cols, art_rows)
@@ -662,8 +685,8 @@ def main():
             buf.append(f"{controls}\033[K")
             buf.append("\033[J")  # Clear any remaining lines below
 
-            # Flush frame to terminal
-            sys.stdout.write('\n'.join(buf) + '\n')
+            # Flush frame to terminal without trailing newline (prevents scrolling)
+            sys.stdout.write('\033[H' + '\n'.join(buf))
             sys.stdout.flush()
 
             time.sleep(0.10)
@@ -686,7 +709,7 @@ def main():
         if not IS_WIN and orig_settings and sys.stdin.isatty():
             termios.tcsetattr(sys.stdin, termios.TCSADRAIN, orig_settings)
         if sys.stdout.isatty():
-            sys.stdout.write('\033[?25h\033[2J\033[H')
+            sys.stdout.write('\033[?1049l\033[?25h')
             sys.stdout.flush()
         print("\n  \033[38;5;141m◆\033[0m \033[38;5;244mPlayback ended.\033[0m\n")
 

@@ -114,12 +114,17 @@ show_banner() {
   [ "${EVERY_CLI_COLOR:-1}" = "0" ] && return
   local tip
   tip=$(random_tip)
-  printf "\n"
-  printf "  ${C_MUT}╭───────────────────────────────────────────────────────────────────╮${C_RST}\n"
-  printf "  ${C_MUT}│${C_RST}  ${C_PRI}◆${C_RST} ${C_WHT}${C_BLD}every-cli${C_RST} ${C_MUT}v%s${C_RST}                          ${C_CYN}● Universal Streamer${C_RST}  ${C_MUT}│${C_RST}\n" "$VERSION"
-  printf "  ${C_MUT}│${C_RST}  ${C_MUT}Stream anime • cinema • series • cartoons • music • live tv         │${C_RST}\n"
-  printf "  ${C_MUT}╰───────────────────────────────────────────────────────────────────╯${C_RST}\n"
-  printf "  ${C_MUT}💡 Tip:${C_RST} ${C_YLW}%s${C_RST}\n\n" "$tip"
+  cat <<EOF
+
+  ${C_PRI} _____ _  _____ _ __ _   _       ___| (_)${C_RST}
+  ${C_PRI}/ _ \\ | / / _ \\ '__| | | |_____ / __| | |${C_RST}
+  ${C_CYN}|  __/ |/ /  __/ |  | |_| |_____| (__| | |${C_RST}  ${C_MUT}v${VERSION}${C_RST}
+  ${C_CYN} \\___|___/ \\___|_|   \\__, |      \\___|_|_|${C_RST}
+  ${C_CYN}                     |___/                ${C_RST}
+
+  ${C_MUT}💡 Tip:${C_RST} ${C_YLW}${tip}${C_RST}
+
+EOF
 }
 
 
@@ -127,13 +132,13 @@ show_banner() {
 if [ -z "$CATEGORY" ]; then
   show_banner
   cat_choice=$(printf '%s\n' \
-    "  ♪   music       Hi-Fi Audio • 320kbps MP3s • Terminal Player" \
     "  ▶   anime       HiAnime 1080p • Japanese Sub & English Dub" \
-    "  🎬  movies      Feature Films • IMDb Metadata • Cinema Vault" \
-    "  📺  tv          TV Series & Seasons • Episode Navigation" \
-    "  📼  cartoons    Retro Library (1,500+) • Archive.org Direct MP4" \
-    "  ⚡  youtube     1080p HD Videos & Podcasts • Instant Search" \
-    "  📡  live        8,000+ Global TV Channels • Free-to-Air" \
+    "  ◆   movies      Feature Films • IMDb Metadata • Cinema Vault" \
+    "  ◇   tv          TV Series & Seasons • Episode Navigation" \
+    "  ◈   cartoons    Retro Library (1,500+) • Archive.org Direct MP4" \
+    "  ♪   music       Hi-Fi Audio • TrueColor Artwork & Live Synced Lyrics" \
+    "  ▲   youtube     1080p HD Videos & Podcasts • Instant Search" \
+    "  ●   live        8,000+ Global TV Channels • Free-to-Air" \
     "  ↺   history     Resume previously played streams" \
     | fzf_prompt "Select Media Category")
   [ -z "$cat_choice" ] && exit 0
@@ -146,7 +151,7 @@ if [ -z "$CATEGORY" ]; then
     *youtube*)  CATEGORY="youtube" ;;
     *live*)     CATEGORY="live" ;;
     *history*)  hist_show; exit 0 ;;
-    *)          CATEGORY="music" ;;
+    *)          CATEGORY="anime" ;;
   esac
 fi
 
