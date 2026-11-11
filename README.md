@@ -1,22 +1,50 @@
 # every-cli
 
-Unified terminal streaming client for anime, movies, TV series, cartoons, music, YouTube, and live IPTV.
+<div align="center">
 
-Built in POSIX `sh` with an interactive `fzf` interface and `mpv` playback engine.
+**Universal Terminal Streaming Client & Media Center**  
+*Anime • Movies • TV Series • Cartoons • Music with Lyrics • YouTube • Live TV*
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-purple.svg)](LICENSE)
+[![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20macOS%20%7C%20Windows-blue.svg)](#installation)
+[![Shell](https://img.shields.io/badge/Shell-POSIX%20sh-green.svg)](#architecture--built-with)
+[![Engine](https://img.shields.io/badge/Engine-MPV%20%7BGPU%7D-red.svg)](https://mpv.io)
+
+<br/>
+
+<img src="preview/main_menu.png" alt="every-cli Main Menu" width="880"/>
+
+</div>
+
+---
+
+## Previews & Screenshots
+
+| Terminal Music Player (TrueColor Cover Art & Synced Lyrics) | Hardware-Accelerated Video Playback |
+|:---:|:---:|
+| <img src="preview/music_player.png" alt="Music Player with Lyrics" width="480"/> | <img src="preview/streaming.png" alt="Active Playback Stream" width="480"/> |
+
+---
 
 ```
-every-cli v1.0.0 ─ Terminal Media Center
-Tip: Quality is set to maximum by default — always the best available
+  ███████╗██╗   ██╗███████╗██████╗ ██╗   ██╗      ██████╗██╗     ██╗
+  ██╔════╝██║   ██║██╔════╝██╔══██╗╚██╗ ██╔╝     ██╔════╝██║     ██║
+  █████╗  ██║   ██║█████╗  ██████╔╝ ╚████╔╝█████╗██║     ██║     ██║
+  ██╔══╝  ╚██╗ ██╔╝██╔══╝  ██╔══██╗  ╚██╔╝ ╚════╝██║     ██║     ██║
+  ███████╗ ╚████╔╝ ███████╗██║  ██║   ██║        ╚██████╗███████╗██║
+  ╚══════╝  ╚═══╝  ╚══════╝╚═╝  ╚═╝   ╚═╝         ╚═════╝╚══════╝╚═╝  v1.0.0
 
-  Category >
-  > anime       Anime streaming (HiAnime 1080p, Sub & Dub)
-    movies      Movies & Cinema (IMDb search & direct streaming)
-    tv          TV Shows & Series (Seasons, episodes & streaming)
-    cartoons    Cartoons (SuperCartoons 1500+ & Archive.org direct MP4)
-    music       Music (Audio-only, best quality, download MP3)
-    youtube     YouTube (1080p HD video, podcasts & music)
-    live        Live TV (8,000+ international IPTV channels)
-    history     History (Resume previously watched streams)
+  💡 Tip: Press '[' and ']' in mpv to change playback speed
+
+  Select Media Category ❯
+  > ▶   anime       HiAnime 1080p • Japanese Sub & English Dub
+    ◆   movies      Feature Films • IMDb Metadata • Cinema Vault
+    ◇   tv          TV Series & Seasons • Episode Navigation
+    ◈   cartoons    Retro Library (1,500+) • Archive.org Direct MP4
+    ♪   music       Hi-Fi Audio • TrueColor Artwork & Live Synced Lyrics
+    ▲   youtube     1080p HD Videos & Podcasts • Instant Search
+    ●   live        8,000+ Global TV Channels • Free-to-Air
+    ↺   history     Resume previously played streams
 ```
 
 ---
