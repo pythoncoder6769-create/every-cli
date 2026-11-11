@@ -55,6 +55,8 @@ Tip: Quality is set to maximum by default — always the best available
 4. **Internet Archive** (`archive.org`): Public digital archive querying complete preserved television seasons, historical cinema, and classic cartoon series (e.g., *Ben 10*, *Batman: The Animated Series*, *Looney Tunes*) served in direct high-bitrate MP4.
 5. **SuperCartoons** (`supercartoons.net`): Database of over 1,500 classic animated theatrical shorts from Warner Bros, Disney, MGM, and Paramount streamed via direct MP4 links.
 6. **iptv-org** (`iptv-org.github.io`): Over 8,000 public broadcast and free-to-air international live television channels organized by category (news, sports, movies, animation, kids, music, documentaries).
+7. **LRCLIB** (`lrclib.net`): Free open database of synchronized karaoke lyrics with millisecond timestamps and full song text.
+8. **Drift Terminal View Engine**: Photorealistic 24-bit TrueColor halfblock album cover art (`▀`) and live synchronized lyric scrolling right inside the terminal window.
 
 ---
 
@@ -240,6 +242,7 @@ EVERY_CLI_COLOR="1"
 | **[ytfzf](https://github.com/pystardust/ytfzf)** | [@pystardust](https://github.com/pystardust) | YouTube fuzzy search navigation, dynamic view-count and duration formatting, and audio-only extraction patterns. |
 | **[yt-dlp](https://github.com/yt-dlp/yt-dlp)** | [@yt-dlp](https://github.com/yt-dlp) | Video/audio format filtering strings (`bestvideo+bestaudio`), multi-bitrate resolution selection, and MP4 stream merging. |
 | **[iptv-org](https://github.com/iptv-org/iptv)** | [@iptv-org](https://github.com/iptv-org) | Global free-to-air international broadcast directories and category-filtered M3U playlists. |
+| **[drift](https://github.com/socatlolmeow/drift)** | [@socatlolmeow](https://github.com/socatlolmeow) | Terminal album artwork display via ANSI halfblocks (`▀`), LRCLIB synchronized lyrics engine, and terminal audio player ergonomics. |
 | **[fzf](https://github.com/junegunn/fzf)** | [@junegunn](https://github.com/junegunn) | Terminal fuzzy-finder styling, rounded border UI layouts, keybinding headers, and instant keyboard selection. |
 
 ---

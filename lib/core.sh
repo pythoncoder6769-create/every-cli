@@ -77,7 +77,7 @@ spin_task() {
 }
 
 random_tip() {
-  local count=18
+  local count=20
   local rand
   # Mix multiple entropy sources for genuine randomness on every call
   local seed
@@ -101,9 +101,11 @@ Type any partial word in fzf for instant fuzzy search
 Press 'f' in mpv to toggle fullscreen, '#' to switch audio tracks
 Press '[' and ']' in mpv to change playback speed
 Use -c anime --dub -q 1080 to skip all menus and go direct
-Use -c music to stream audio-only at max quality (no video)
+Use -c music to stream with Drift album artwork & live synced lyrics
 Use -c music -d to download any song as high-quality MP3
 Music mode: press 9/0 for volume, SPACE to pause, m to mute
+Drift engine displays live synchronized lyrics line-by-line as it's sung
+Music view renders photorealistic TrueColor 24-bit album artwork
 EOF
 }
 

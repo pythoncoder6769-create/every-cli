@@ -16,13 +16,30 @@ if [ -n "$LIB_DIR" ] && [ -f "$LIB_DIR/core.sh" ]; then
   [ -f "$LIB_DIR/scrapers/yt_search.sh" ] && . "$LIB_DIR/scrapers/yt_search.sh"
 fi
 
-# ── Audio-only player (no video, terminal OSD, volume controls) ───────────────
+# ── Audio player with Drift Terminal UI (Artwork & Synced Lyrics) ─────────────
 play_audio() {
   local url="$1" title="${2:-Music}" refr="${3:-}"
   local mpv_bin
   mpv_bin=$(_find_mpv)
   mpv_bin="${mpv_bin:-mpv}"
 
+  local drift_py=""
+  if [ -n "$LIB_DIR" ] && [ -f "$LIB_DIR/drift_player.py" ]; then
+    drift_py="$LIB_DIR/drift_player.py"
+  elif [ -f "$(dirname "$0")/../drift_player.py" ]; then
+    drift_py="$(dirname "$0")/../drift_player.py"
+  fi
+
+  # Launch the Drift Terminal UI with TrueColor cover art & synchronized lyrics
+  if [ -n "$drift_py" ] && command -v python >/dev/null 2>&1; then
+    python "$drift_py" "$url" "$title"
+    return $?
+  elif [ -n "$drift_py" ] && command -v python3 >/dev/null 2>&1; then
+    python3 "$drift_py" "$url" "$title"
+    return $?
+  fi
+
+  # Fallback to pure shell player if Python is absent
   render_media_card "$title" "YouTube Audio" "320kbps Max" "1"
 
   "$mpv_bin" \

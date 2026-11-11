@@ -15,6 +15,9 @@ history
 test_*.sh
 test_*.py
 scratch/
+__pycache__/
+*.pyc
+*.pyo
 
 # Reference sub-repositories if kept in tree
 ani-cli-master/
@@ -22,3 +25,4 @@ mov-cli-4/
 yt-dlp-master/
 ytfzf-master/
 _references/
+drift-main/

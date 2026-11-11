@@ -38,6 +38,7 @@ install -m 755 every-cli "$BIN_DIR/every-cli"
 # Install libraries
 mkdir -p "$DATA_DIR/lib/scrapers" "$DATA_DIR/lib/providers"
 install -m 644 lib/core.sh "$DATA_DIR/lib/core.sh"
+[ -f lib/drift_player.py ] && install -m 755 lib/drift_player.py "$DATA_DIR/lib/drift_player.py"
 for s in lib/scrapers/*.sh; do
   install -m 644 "$s" "$DATA_DIR/lib/scrapers/"
 done

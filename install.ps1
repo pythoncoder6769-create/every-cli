@@ -32,6 +32,7 @@ $LibDest = "$env:USERPROFILE\.every-cli\lib"
 New-Item -ItemType Directory -Force -Path "$LibDest\scrapers" | Out-Null
 New-Item -ItemType Directory -Force -Path "$LibDest\providers" | Out-Null
 Copy-Item "lib\core.sh" "$LibDest\" -Force
+if (Test-Path "lib\drift_player.py") { Copy-Item "lib\drift_player.py" "$LibDest\" -Force }
 Copy-Item "lib\scrapers\*" "$LibDest\scrapers\" -Force
 Copy-Item "lib\providers\*" "$LibDest\providers\" -Force
 

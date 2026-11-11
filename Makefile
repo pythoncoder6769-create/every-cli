@@ -23,6 +23,7 @@ install:
 	mkdir -p $(DESTDIR)$(DATADIR)/lib/providers
 	mkdir -p $(DESTDIR)$(DATADIR)/lib/scrapers
 	install -m 644 lib/core.sh $(DESTDIR)$(DATADIR)/lib/core.sh
+	if [ -f lib/drift_player.py ]; then install -m 755 lib/drift_player.py $(DESTDIR)$(DATADIR)/lib/drift_player.py; fi
 	install -m 644 lib/providers/*.sh $(DESTDIR)$(DATADIR)/lib/providers/
 	install -m 644 lib/scrapers/*.sh $(DESTDIR)$(DATADIR)/lib/scrapers/
 	mkdir -p $(DESTDIR)$(MANDIR)
