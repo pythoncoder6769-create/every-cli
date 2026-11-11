@@ -5,6 +5,7 @@ Thumbs.db
 *.bak
 *.tmp
 *~
+*.zip
 
 # Runtime cache and watch history
 .every-cli-cache/

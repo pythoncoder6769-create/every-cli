@@ -21,7 +21,7 @@ movies_search_and_play() {
   if [ -z "$query" ]; then
     local cat_label
     cat_label=$([ "$content_type" = "tv" ] && echo "TV Shows" || echo "Movies")
-    printf "${C_CYN}  Search %s ❯${C_RST} " "$cat_label"
+    printf "\n  ${C_PRI}◆${C_RST} ${C_WHT}${C_BLD}Search %s${C_RST} ${C_MUT}❯${C_RST} " "$cat_label"
     read -r query
     [ -z "$query" ] && return
   fi
@@ -58,9 +58,9 @@ movies_search_and_play() {
 
   local season="" episode=""
   if [ "$content_type" = "tv" ] || [ "$media_type" = "TV series" ]; then
-    printf "${C_CYN}  Season number (default 1) ❯${C_RST} "; read -r season
+    printf "  ${C_MUT}↳${C_RST} ${C_CYN}Season number (default 1)${C_RST} ${C_MUT}❯${C_RST} "; read -r season
     season="${season:-1}"
-    printf "${C_CYN}  Episode number (default 1) ❯${C_RST} "; read -r episode
+    printf "  ${C_MUT}↳${C_RST} ${C_CYN}Episode number (default 1)${C_RST} ${C_MUT}❯${C_RST} "; read -r episode
     episode="${episode:-1}"
   fi
 
@@ -72,7 +72,9 @@ movies_search_and_play() {
   fi
 
   local src_choice
-  src_choice=$(printf "HD Stream (1080p / 4K / Best)\nArchive.org Cinema Vault (Classic & Public Domain)\n" \
+  src_choice=$(printf '%s\n' \
+    "  ⚡  HD Stream (1080p / 4K / Best Available)" \
+    "  🏛   Archive.org Cinema Vault (Classic & Public Domain)" \
     | fzf_prompt "Select Source for '$title'")
 
   case "$src_choice" in

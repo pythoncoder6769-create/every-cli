@@ -12,19 +12,19 @@ live_tv_browse() {
   if [ -z "$category" ]; then
     local cat_choice
     cat_choice=$(printf '%s\n' \
-      "all           Worldwide channels (8,000+)" \
-      "news          Global & local news" \
-      "sports        Live sports & highlights" \
-      "movies        Continuous movie channels" \
-      "animation     Anime & animated broadcasts" \
-      "kids          Cartoons & children TV" \
-      "music         24/7 music videos & concerts" \
-      "entertainment General entertainment & series" \
-      "cooking       Culinary, food & recipes" \
-      "documentary   Nature, science & history" \
-      | fzf_prompt "IPTV Category")
+      "  🌐  all            Worldwide broadcast channels (8,000+)" \
+      "  📰  news           Global & local live news networks" \
+      "  ⚽  sports         Live sports, matches & highlights" \
+      "  🎬  movies         Continuous cinema & film streams" \
+      "  ⛩   animation      Anime & 24/7 animated broadcasts" \
+      "  🧸  kids           Children television & cartoons" \
+      "  ♪   music          24/7 live music videos & concerts" \
+      "  🎭  entertainment  General entertainment & drama series" \
+      "  🍳  cooking        Culinary, food channels & recipes" \
+      "  🌿  documentary    Nature, science, history & discovery" \
+      | fzf_prompt "Live IPTV Categories")
     [ -z "$cat_choice" ] && return
-    category=$(printf '%s' "$cat_choice" | awk '{print $1}')
+    category=$(printf '%s' "$cat_choice" | awk '{print $2}')
   fi
 
   local m3u_url

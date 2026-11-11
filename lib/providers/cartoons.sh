@@ -21,7 +21,7 @@ cartoons_search_and_play() {
   if [ -n "$1" ]; then
     query="$1"
   else
-    printf "${C_CYN}  Search Cartoons ❯${C_RST} "
+    printf "\n  ${C_PRI}◆${C_RST} ${C_WHT}${C_BLD}Search Cartoons${C_RST} ${C_MUT}❯${C_RST} "
     read -r query
     [ -z "$query" ] && return
   fi
@@ -31,8 +31,11 @@ cartoons_search_and_play() {
   sc_results=$(supercartoons_search "$query" 2>/dev/null)
   if [ -n "$sc_results" ]; then
     local src_choice
-    src_choice=$(printf "HD Episodes & Series (1080p)\nSuperCartoons Classic Shorts (1500+ direct MP4s)\nArchive.org Vault\n" \
-      | fzf_prompt "Select source for '$query'")
+    src_choice=$(printf '%s\n' \
+      "  ⚡  HD Episodes & Series (1080p Stream)" \
+      "  📼  SuperCartoons Classic Shorts (1,500+ direct MP4s)" \
+      "  🏛   Archive.org Vault (Full Series)" \
+      | fzf_prompt "Select Source for '$query'")
     case "$src_choice" in
       *SuperCartoons*)
         _cartoons_play_supercartoons "$sc_results" "$download_mode" && return 0

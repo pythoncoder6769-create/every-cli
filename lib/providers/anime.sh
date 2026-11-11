@@ -8,7 +8,7 @@ anime_search_and_play() {
   local query="$1" ep_arg="$2" lang="${EVERY_CLI_LANG:-sub}" download_mode="$3"
   local quality="${EVERY_CLI_QUALITY:-best}"
   if [ -z "$query" ]; then
-    printf "${C_CYN}  Search Anime ❯${C_RST} "
+    printf "\n  ${C_PRI}◆${C_RST} ${C_WHT}${C_BLD}Search Anime${C_RST} ${C_MUT}❯${C_RST} "
     read -r query
     [ -z "$query" ] && return
   fi

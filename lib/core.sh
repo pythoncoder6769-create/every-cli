@@ -4,32 +4,47 @@
 
 # ── Colours ──────────────────────────────────────────────────────────────────
 if [ "${EVERY_CLI_COLOR:-1}" = "1" ] && [ -t 1 ]; then
-  C_RED='\033[31m'; C_GRN='\033[32m'; C_YLW='\033[33m'
-  C_BLU='\033[34m'; C_MAG='\033[35m'; C_CYN='\033[36m'
-  C_BLD='\033[1m';  C_RST='\033[0m'
+  C_RST='\033[0m'
+  C_BLD='\033[1m'
+  C_DIM='\033[2m'
+  C_ITA='\033[3m'
+  C_UND='\033[4m'
+  C_REV='\033[7m'
+
+  # Modern 256-color palette (Claude Code / OpenCode aesthetic)
+  C_PRI='\033[38;5;141m'  # Violet / Purple accent
+  C_CYN='\033[38;5;45m'   # Electric Cyan / Sky
+  C_GRN='\033[38;5;48m'   # Vibrant Emerald Green
+  C_YLW='\033[38;5;220m'  # Warm Amber Gold
+  C_RED='\033[38;5;203m'  # Coral Red
+  C_MAG='\033[38;5;213m'  # Soft Magenta
+  C_BLU='\033[38;5;75m'   # Royal Blue
+  C_MUT='\033[38;5;243m'  # Slate Gray / Border
+  C_WHT='\033[38;5;255m'  # Crisp Pure White
 else
-  C_RED=''; C_GRN=''; C_YLW=''; C_BLU=''
-  C_MAG=''; C_CYN=''; C_BLD=''; C_RST=''
+  C_RST=''; C_BLD=''; C_DIM=''; C_ITA=''; C_UND=''; C_REV=''
+  C_PRI=''; C_CYN=''; C_GRN=''; C_YLW=''; C_RED=''; C_MAG=''; C_BLU=''; C_MUT=''; C_WHT=''
 fi
 
-err()  { printf "${C_RED}Error:${C_RST} %s\n" "$*" >&2; }
-warn() { printf "${C_YLW}Warning:${C_RST} %s\n" "$*" >&2; }
-info() { printf "${C_BLU}::${C_RST} %s\n" "$*"; }
-die()  { err "$@"; exit 1; }
+err()     { printf "  ${C_RED}✖${C_RST}  ${C_RED}%s${C_RST}\n" "$*" >&2; }
+warn()    { printf "  ${C_YLW}▲${C_RST}  ${C_YLW}%s${C_RST}\n" "$*" >&2; }
+info()    { printf "  ${C_CYN}◆${C_RST}  %s\n" "$*"; }
+success() { printf "  ${C_GRN}✔${C_RST}  ${C_GRN}%s${C_RST}\n" "$*"; }
+die()     { err "$@"; exit 1; }
 
 spin_pid() {
   local pid=$1
   local msg="$2"
-  local chars="/-\|"
+  local chars="⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"
   local i=0
 
   # Hide cursor
   [ -t 2 ] && printf "\033[?25l" >&2
 
   while kill -0 "$pid" 2>/dev/null; do
-    local idx=$(( (i % 4) + 1 ))
+    local idx=$(( (i % 10) + 1 ))
     local char=$(printf '%s' "$chars" | cut -c "$idx")
-    printf "\r\033[K${C_CYN}[%s]${C_RST} %s" "$char" "$msg" >&2
+    printf "\r\033[K  ${C_CYN}%s${C_RST}  ${C_MUT}%s${C_RST}" "$char" "$msg" >&2
     i=$((i + 1))
     sleep 0.08
   done
@@ -37,9 +52,9 @@ spin_pid() {
   local status=$?
 
   if [ $status -eq 0 ]; then
-    printf "\r\033[K${C_GRN}[+]${C_RST} %s\n" "$msg" >&2
+    printf "\r\033[K  ${C_GRN}✔${C_RST}  %s\n" "$msg" >&2
   else
-    printf "\r\033[K${C_YLW}[!]${C_RST} %s\n" "$msg" >&2
+    printf "\r\033[K  ${C_YLW}▲${C_RST}  %s\n" "$msg" >&2
   fi
 
   # Restore cursor
@@ -209,31 +224,53 @@ dep_check() {
   fi
 }
 
-# ── fzf wrapper (clean minimalist terminal styling) ───────────────────────────
+# ── fzf wrapper (Claude Code / OpenCode dark palette) ─────────────────────────
 fzf_prompt() {
   local prompt_text="${1:-Select}"
   local fzf_bin
   fzf_bin=$(_find_fzf)
   fzf_bin="${fzf_bin:-fzf}"
   "$fzf_bin" \
-      --prompt="  $prompt_text > " \
-      --pointer=">" \
-      --marker="*" \
-      --height=60% \
+      --prompt="  $prompt_text ❯ " \
+      --pointer="  ❯" \
+      --marker="✔ " \
+      --height=65% \
       --layout=reverse \
       --border=rounded \
       --border-label=" every-cli " \
       --border-label-pos=3 \
       --info=inline-right \
       --no-sort \
-      --header="[ENTER] Select  |  [ESC] Back" \
+      --header=" [ENTER] Select   [ESC] Back   [CTRL-C] Quit" \
       --header-first \
-      --color='prompt:bold:cyan,pointer:bold:cyan,border:blue,label:bold:yellow,header:italic:gray,info:yellow,hl:bold:green,hl+:bold:green'
+      --color='prompt:bold:cyan,pointer:bold:magenta,border:240,label:bold:yellow,header:italic:245,info:yellow,hl:bold:green,hl+:bold:green,fg+:bold:white'
 }
 
 fzf_select() {
   local prompt="$1"; shift
   printf '%s\n' "$@" | fzf_prompt "$prompt"
+}
+
+# ── Media Card Renderer (Claude Code / OpenCode aesthetic) ───────────────────
+render_media_card() {
+  local title="$1" source="${2:-Stream}" quality="${3:-Best}" is_audio="${4:-0}"
+  printf "\n"
+  if [ "$is_audio" = "1" ]; then
+    printf "  ${C_MUT}╭── ${C_PRI}${C_BLD}NOW PLAYING • AUDIO ONLY${C_RST}${C_MUT} ──────────────────────────────────────╮${C_RST}\n"
+    printf "  ${C_MUT}│${C_RST}  ${C_YLW}♪${C_RST}  ${C_WHT}${C_BLD}%-58.58s${C_RST}  ${C_MUT}│${C_RST}\n" "$title"
+    printf "  ${C_MUT}│${C_RST}     ${C_MUT}Source:${C_RST} %-18.18s   ${C_MUT}Quality:${C_RST} ${C_GRN}%-16.16s${C_RST}      ${C_MUT}│${C_RST}\n" "$source" "$quality"
+    printf "  ${C_MUT}│                                                                  │${C_RST}\n"
+    printf "  ${C_MUT}│${C_RST}  ${C_MUT}Keys:${C_RST} [Space] Pause/Play   [9/0] Volume   [m] Mute              ${C_MUT}│${C_RST}\n"
+    printf "  ${C_MUT}│${C_RST}        [←/→] Seek ±5s        [↑/↓] Seek ±60s  [q] Return to Menu ${C_MUT}│${C_RST}\n"
+    printf "  ${C_MUT}╰──────────────────────────────────────────────────────────────────╯${C_RST}\n\n"
+  else
+    printf "  ${C_MUT}╭── ${C_PRI}${C_BLD}NOW STREAMING${C_RST}${C_MUT} ─────────────────────────────────────────────────╮${C_RST}\n"
+    printf "  ${C_MUT}│${C_RST}  ${C_CYN}▶${C_RST}  ${C_WHT}${C_BLD}%-58.58s${C_RST}  ${C_MUT}│${C_RST}\n" "$title"
+    printf "  ${C_MUT}│${C_RST}     ${C_MUT}Source:${C_RST} %-18.18s   ${C_MUT}Quality:${C_RST} ${C_GRN}%-16.16s${C_RST}      ${C_MUT}│${C_RST}\n" "$source" "$quality"
+    printf "  ${C_MUT}│                                                                  │${C_RST}\n"
+    printf "  ${C_MUT}│${C_RST}  ${C_MUT}Keys:${C_RST} [f] Fullscreen   [Space] Pause   [9/0] Volume   [q] Return   ${C_MUT}│${C_RST}\n"
+    printf "  ${C_MUT}╰──────────────────────────────────────────────────────────────────╯${C_RST}\n\n"
+  fi
 }
 
 # ── Quality prompt helper ─────────────────────────────────────────────────────
@@ -294,15 +331,15 @@ play_url() {
     *)     ytdl_fmt="--ytdl-format=bestvideo+bestaudio/best" ;;
   esac
 
-  printf "${C_GRN}[+]${C_RST} Playing: ${C_BLD}%s${C_RST} ${C_YLW}(press 'q' in player to return)${C_RST}\n" "$title"
+  render_media_card "$title" "MPV Player" "$quality" "0"
 
   case "$player" in
     mpv)
       "$mpv_bin" \
         --force-window=immediate \
         --hwdec=auto \
-        --term-osd-bar \
-        --msg-level=all=warn,cplayer=info \
+        --msg-level=all=error \
+        --really-quiet \
         --demuxer-readahead-secs=20 \
         --demuxer-max-bytes=50M \
         --ytdl-raw-options="extractor-args=youtube:player_client=android" \

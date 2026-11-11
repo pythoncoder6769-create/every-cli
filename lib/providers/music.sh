@@ -23,15 +23,13 @@ play_audio() {
   mpv_bin=$(_find_mpv)
   mpv_bin="${mpv_bin:-mpv}"
 
-  printf "${C_GRN}[+]${C_RST} Now playing: ${C_BLD}%s${C_RST}\n" "$title"
-  printf "${C_YLW}    Controls: [q] quit  [9/0] volume -/+  [LEFT/RIGHT] seek -/+5s${C_RST}\n"
-  printf "${C_YLW}              [UP/DOWN] seek -/+60s  [SPACE] pause  [m] mute${C_RST}\n\n"
+  render_media_card "$title" "YouTube Audio" "320kbps Max" "1"
 
   "$mpv_bin" \
     --no-video \
     --term-osd-bar \
-    --term-osd-bar-chars='[=>-]' \
-    --msg-level=all=warn,cplayer=status,statusline=status \
+    --term-osd-bar-chars="[■■-]" \
+    --msg-level=all=no,statusline=status \
     --ytdl-format="bestaudio/best" \
     --ytdl-raw-options="extractor-args=youtube:player_client=android" \
     --demuxer-readahead-secs=30 \
@@ -66,18 +64,18 @@ music_search_and_play() {
   local query="$1" download_mode="$2"
 
   if [ -z "$query" ]; then
-    printf "${C_CYN}  Search Music ❯${C_RST} "
+    printf "\n  ${C_PRI}◆${C_RST} ${C_WHT}${C_BLD}Search Music${C_RST} ${C_MUT}❯${C_RST} "
     read -r query
     [ -z "$query" ] && return
   fi
 
   local mode_choice
   mode_choice=$(printf '%s\n' \
-    "Search Song (find and play a specific track)" \
-    "Search Artist (browse songs by an artist)" \
-    "Playlist / Mix (curated mixes and playlists)" \
-    "Lyrics Video (play with on-screen lyrics)" \
-    | fzf_prompt "Music Mode for '$query'")
+    "  ♪   Search Song      Direct track playback (audio-only)" \
+    "  👤  Search Artist    Browse artist discography & top hits" \
+    "  ⚡  Playlist / Mix   Curated albums & continuous mixes" \
+    "  📝  Lyrics Video     Watch video with synchronized lyrics" \
+    | fzf_prompt "Music Mode — '$query'")
   [ -z "$mode_choice" ] && return
 
   local search_suffix=""
@@ -90,13 +88,13 @@ music_search_and_play() {
   esac
 
   local results
-  results=$(spin_task "Searching music for '$query'..." music_yt_search "$query $search_suffix" 25)
+  results=$(spin_task "Searching music archives for '$query'..." music_yt_search "$query $search_suffix" 25)
   [ -z "$results" ] && { err "No music results found for: $query"; return 1; }
 
   local selected
   selected=$(printf '%s\n' "$results" \
     | awk -F'\t' '{print $1}' \
-    | fzf_prompt "Select track")
+    | fzf_prompt "Select Track")
   [ -z "$selected" ] && return
 
   local yt_url
@@ -124,25 +122,30 @@ music_search_and_play() {
   # Post-playback menu
   while [ -t 0 ]; do
     local action
-    action=$(printf 'replay\nsearch again\ndownload this track (MP3)\nqueue next from results\nquit' \
-      | fzf_prompt "Music — $selected")
+    action=$(printf '%s\n' \
+      "  ↺   Replay track" \
+      "  ⏭   Queue next from search results" \
+      "  ⬇   Download as high-bitrate MP3" \
+      "  🔍  Search another song" \
+      "  ✕   Return to main menu" \
+      | fzf_prompt "Track Finished — $selected")
 
     case "$action" in
-      replay)
+      *Replay*)
         if [ "$is_lyrics" = "1" ]; then
           play_url "$yt_url" "$selected"
         else
           play_audio "$yt_url" "$selected"
         fi
         ;;
-      "search again")
+      *Search*)
         music_search_and_play "" "$download_mode"
         break
         ;;
-      "download this track"*)
+      *Download*)
         download_audio "$yt_url" "$selected"
         ;;
-      "queue next"*)
+      *Queue*)
         # Play next unplayed track from the results list
         local next_track next_url
         next_track=$(printf '%s\n' "$results" \

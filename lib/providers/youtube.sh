@@ -7,7 +7,7 @@ youtube_search_and_play() {
   local query="$1" download_mode="$2"
 
   if [ -z "$query" ]; then
-    printf "${C_CYN}  Search YouTube ❯${C_RST} "
+    printf "\n  ${C_PRI}◆${C_RST} ${C_WHT}${C_BLD}Search YouTube${C_RST} ${C_MUT}❯${C_RST} "
     read -r query
     [ -z "$query" ] && return
   fi

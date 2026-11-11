@@ -114,8 +114,12 @@ show_banner() {
   [ "${EVERY_CLI_COLOR:-1}" = "0" ] && return
   local tip
   tip=$(random_tip)
-  printf "\n${C_BLD}${C_CYN}  every-cli v%s${C_RST} ${C_BLU}─${C_RST} ${C_BLD}Terminal Media Center${C_RST}\n" "$VERSION"
-  printf "  ${C_YLW}Tip: %s${C_RST}\n\n" "$tip"
+  printf "\n"
+  printf "  ${C_MUT}╭───────────────────────────────────────────────────────────────────╮${C_RST}\n"
+  printf "  ${C_MUT}│${C_RST}  ${C_PRI}◆${C_RST} ${C_WHT}${C_BLD}every-cli${C_RST} ${C_MUT}v%s${C_RST}                          ${C_CYN}● Universal Streamer${C_RST}  ${C_MUT}│${C_RST}\n" "$VERSION"
+  printf "  ${C_MUT}│${C_RST}  ${C_MUT}Stream anime • cinema • series • cartoons • music • live tv         │${C_RST}\n"
+  printf "  ${C_MUT}╰───────────────────────────────────────────────────────────────────╯${C_RST}\n"
+  printf "  ${C_MUT}💡 Tip:${C_RST} ${C_YLW}%s${C_RST}\n\n" "$tip"
 }
 
 
@@ -123,26 +127,26 @@ show_banner() {
 if [ -z "$CATEGORY" ]; then
   show_banner
   cat_choice=$(printf '%s\n' \
-    "anime       Anime streaming (HiAnime 1080p, Sub & Dub)" \
-    "movies      Movies & Cinema (IMDb search & direct streaming)" \
-    "tv          TV Shows & Series (Seasons, episodes & streaming)" \
-    "cartoons    Cartoons (SuperCartoons 1500+ & Archive.org direct MP4)" \
-    "music       Music (Audio-only, best quality, download MP3)" \
-    "youtube     YouTube (1080p HD video, podcasts & music)" \
-    "live        Live TV (8,000+ international IPTV channels)" \
-    "history     History (Resume previously watched streams)" \
-    | fzf_prompt "Category")
+    "  ♪   music       Hi-Fi Audio • 320kbps MP3s • Terminal Player" \
+    "  ▶   anime       HiAnime 1080p • Japanese Sub & English Dub" \
+    "  🎬  movies      Feature Films • IMDb Metadata • Cinema Vault" \
+    "  📺  tv          TV Series & Seasons • Episode Navigation" \
+    "  📼  cartoons    Retro Library (1,500+) • Archive.org Direct MP4" \
+    "  ⚡  youtube     1080p HD Videos & Podcasts • Instant Search" \
+    "  📡  live        8,000+ Global TV Channels • Free-to-Air" \
+    "  ↺   history     Resume previously played streams" \
+    | fzf_prompt "Select Media Category")
   [ -z "$cat_choice" ] && exit 0
   case "$cat_choice" in
-    anime*)    CATEGORY="anime" ;;
-    movies*)   CATEGORY="movies" ;;
-    tv*)       CATEGORY="tv" ;;
-    cartoons*) CATEGORY="cartoons" ;;
-    music*)    CATEGORY="music" ;;
-    youtube*)  CATEGORY="youtube" ;;
-    live*)     CATEGORY="live" ;;
-    history*)  hist_show; exit 0 ;;
-    *)         CATEGORY="anime" ;;
+    *anime*)    CATEGORY="anime" ;;
+    *movies*)   CATEGORY="movies" ;;
+    *tv*)       CATEGORY="tv" ;;
+    *cartoons*) CATEGORY="cartoons" ;;
+    *music*)    CATEGORY="music" ;;
+    *youtube*)  CATEGORY="youtube" ;;
+    *live*)     CATEGORY="live" ;;
+    *history*)  hist_show; exit 0 ;;
+    *)          CATEGORY="music" ;;
   esac
 fi
 
