@@ -85,7 +85,7 @@ allanime_get_stream() {
 
     case "$src" in *"googletagmanager"*|*"doubleclick"*) continue ;; esac
 
-    if stream_url=$(yt-dlp --no-warnings -g --format "bestvideo+bestaudio/best" "$src" 2>/dev/null | tr -d '\r') \
+    if stream_url=$(yt-dlp --no-warnings -g --extractor-args "youtube:player_client=android" --format "bestvideo+bestaudio/best" "$src" 2>/dev/null | tr -d '\r') \
        && [ -n "$stream_url" ]; then
       printf '%s' "$stream_url"
       return 0

@@ -65,5 +65,12 @@ if [ -f completions/every-cli.fish ]; then
   install -m 644 completions/every-cli.fish "$FISH_COMP/every-cli.fish" 2>/dev/null || true
 fi
 
+# Configure yt-dlp android player client for reliable playback
+YTDLP_CFG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/yt-dlp"
+mkdir -p "$YTDLP_CFG_DIR" 2>/dev/null || true
+if [ ! -f "$YTDLP_CFG_DIR/config" ]; then
+  printf -- '--extractor-args "youtube:player_client=android"\n' > "$YTDLP_CFG_DIR/config" 2>/dev/null || true
+fi
+
 echo "every-cli installed successfully to $BIN_DIR/every-cli"
 echo "Run 'every-cli --help' or 'man every-cli' to get started."

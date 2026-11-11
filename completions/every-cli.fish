@@ -1,5 +1,5 @@
 # Fish completion for every-cli
-complete -c every-cli -s c -l category -x -a 'anime movies tv cartoons youtube live' -d 'Content category'
+complete -c every-cli -s c -l category -x -a 'anime movies tv cartoons youtube music live' -d 'Content category'
 complete -c every-cli -s e -l episode -x -d 'Episode number or range'
 complete -c every-cli -s q -l quality -x -a 'best 1080 720 480 360' -d 'Video quality'
 complete -c every-cli -s d -l download -d 'Download instead of streaming'

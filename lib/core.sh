@@ -62,7 +62,7 @@ spin_task() {
 }
 
 random_tip() {
-  local count=15
+  local count=18
   local rand
   # Mix multiple entropy sources for genuine randomness on every call
   local seed
@@ -86,6 +86,9 @@ Type any partial word in fzf for instant fuzzy search
 Press 'f' in mpv to toggle fullscreen, '#' to switch audio tracks
 Press '[' and ']' in mpv to change playback speed
 Use -c anime --dub -q 1080 to skip all menus and go direct
+Use -c music to stream audio-only at max quality (no video)
+Use -c music -d to download any song as high-quality MP3
+Music mode: press 9/0 for volume, SPACE to pause, m to mute
 EOF
 }
 
@@ -256,6 +259,21 @@ prompt_quality() {
   esac
 }
 
+# ── yt-dlp config initialization ─────────────────────────────────────────────
+_init_ytdlp_config() {
+  local cfg_dir=""
+  if [ -n "$APPDATA" ] && [ -d "$APPDATA" ]; then
+    cfg_dir="$APPDATA/yt-dlp"
+  else
+    cfg_dir="${XDG_CONFIG_HOME:-$HOME/.config}/yt-dlp"
+  fi
+  if [ ! -f "$cfg_dir/config" ]; then
+    mkdir -p "$cfg_dir" 2>/dev/null || true
+    printf -- '--extractor-args "youtube:player_client=android"\n' > "$cfg_dir/config" 2>/dev/null || true
+  fi
+}
+_init_ytdlp_config
+
 # ── Player ────────────────────────────────────────────────────────────────────
 play_url() {
   local url="$1" title="${2:-every-cli}" refr="${3:-}" sub="${4:-}"
@@ -287,6 +305,7 @@ play_url() {
         --msg-level=all=warn,cplayer=info \
         --demuxer-readahead-secs=20 \
         --demuxer-max-bytes=50M \
+        --ytdl-raw-options="extractor-args=youtube:player_client=android" \
         ${extra_mpv:+"$extra_mpv"} \
         ${ytdl_fmt:+"$ytdl_fmt"} \
         ${refr:+--referrer="$refr"} \
@@ -305,6 +324,7 @@ play_url() {
           --meta-title="$title" "$url" 2>/dev/null
       else
         "$mpv_bin" --really-quiet --hwdec=auto \
+          --ytdl-raw-options="extractor-args=youtube:player_client=android" \
           ${extra_mpv:+"$extra_mpv"} \
           ${ytdl_fmt:+"$ytdl_fmt"} \
           ${refr:+--referrer="$refr"} \
@@ -331,7 +351,7 @@ resolve_stream() {
     *)     fmt="bestvideo+bestaudio/best" ;;
   esac
   # Return all stream URLs (video + audio) so mpv can merge them
-  yt-dlp --no-warnings -g --format "$fmt" "$url" 2>/dev/null | tr -d '\r'
+  yt-dlp --no-warnings --extractor-args "youtube:player_client=android" -g --format "$fmt" "$url" 2>/dev/null | tr -d '\r'
 }
 
 # ── Download ──────────────────────────────────────────────────────────────────
@@ -351,6 +371,7 @@ download_url() {
   mkdir -p "$out_dir"
   info "Downloading to: $out_dir (quality: $quality)"
   yt-dlp --no-warnings \
+         --extractor-args "youtube:player_client=android" \
          ${refr:+--referer "$refr"} \
          -o "$out_dir/%(title)s.%(ext)s" \
          --format "$fmt" \

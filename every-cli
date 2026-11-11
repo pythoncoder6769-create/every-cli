@@ -33,6 +33,7 @@ CONF="$HOME/.config/every-cli/config"
 . "$LIB_DIR/scrapers/imdb.sh"
 . "$LIB_DIR/scrapers/vidsrc.sh"
 . "$LIB_DIR/scrapers/yt_search.sh"
+. "$LIB_DIR/scrapers/music_api.sh"
 
 # Load providers
 . "$LIB_DIR/providers/anime.sh"
@@ -40,6 +41,7 @@ CONF="$HOME/.config/every-cli/config"
 . "$LIB_DIR/providers/cartoons.sh"
 . "$LIB_DIR/providers/youtube.sh"
 . "$LIB_DIR/providers/live_tv.sh"
+. "$LIB_DIR/providers/music.sh"
 
 # ── Parse arguments ──────────────────────────────────────────────────────────
 CATEGORY=""
@@ -59,7 +61,7 @@ ${C_BLD}USAGE${C_RST}
   every-cli [OPTIONS] [QUERY]
 
 ${C_BLD}OPTIONS${C_RST}
-  -c, --category CATEGORY   anime|movies|tv|cartoons|youtube|live
+  -c, --category CATEGORY   anime|movies|tv|cartoons|youtube|music|live
   -e, --episode EP          Episode number or range (e.g. 5 or 1-12)
   -q, --quality Q           best|1080|720|480|360 (default: best)
   -d, --download            Download instead of streaming
@@ -78,6 +80,8 @@ ${C_BLD}EXAMPLES${C_RST}
   every-cli -c tv "Breaking Bad"         # search TV shows
   every-cli -c cartoons "SpongeBob"      # search cartoons (4-source fallback)
   every-cli -c youtube "lo-fi mix"       # search YouTube
+  every-cli -c music "Eminem"            # stream music (audio-only, best quality)
+  every-cli -c music -d "Imagine"        # download music as MP3
   every-cli -c live                      # IPTV browser
   every-cli -c anime -d -e 1-13 "Naruto" # download episodes 1-13
 EOF
@@ -123,6 +127,7 @@ if [ -z "$CATEGORY" ]; then
     "movies      Movies & Cinema (IMDb search & direct streaming)" \
     "tv          TV Shows & Series (Seasons, episodes & streaming)" \
     "cartoons    Cartoons (SuperCartoons 1500+ & Archive.org direct MP4)" \
+    "music       Music (Audio-only, best quality, download MP3)" \
     "youtube     YouTube (1080p HD video, podcasts & music)" \
     "live        Live TV (8,000+ international IPTV channels)" \
     "history     History (Resume previously watched streams)" \
@@ -133,6 +138,7 @@ if [ -z "$CATEGORY" ]; then
     movies*)   CATEGORY="movies" ;;
     tv*)       CATEGORY="tv" ;;
     cartoons*) CATEGORY="cartoons" ;;
+    music*)    CATEGORY="music" ;;
     youtube*)  CATEGORY="youtube" ;;
     live*)     CATEGORY="live" ;;
     history*)  hist_show; exit 0 ;;
@@ -147,6 +153,7 @@ case "$CATEGORY" in
   movies)   movies_search_and_play "$QUERY" "movie" "$DOWNLOAD" ;;
   tv)       movies_search_and_play "$QUERY" "tv" "$DOWNLOAD" ;;
   cartoons) cartoons_search_and_play "$QUERY" "$DOWNLOAD" ;;
+  music)    music_search_and_play "$QUERY" "$DOWNLOAD" ;;
   youtube)  youtube_search_and_play "$QUERY" "$DOWNLOAD" ;;
   live)     live_tv_browse ;;
   *)        err "Unknown category: $CATEGORY"; usage; exit 1 ;;

@@ -1,7 +1,7 @@
 #compdef every-cli
 
 _every-cli() {
-  local -a categories=(anime movies tv cartoons youtube live)
+  local -a categories=(anime movies tv cartoons youtube music live)
   local -a qualities=(best 1080 720 480 360)
 
   _arguments \

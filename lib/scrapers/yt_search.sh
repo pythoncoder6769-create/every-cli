@@ -51,6 +51,7 @@ yt_download() {
 
   info "Downloading to: $out_dir"
   yt-dlp --no-warnings \
+    --extractor-args "youtube:player_client=android" \
     -o "$out_dir/%(uploader)s - %(title)s.%(ext)s" \
     --format "$fmt" \
     --merge-output-format mp4 \

@@ -32,6 +32,7 @@ vidsrc_resolve() {
   local stream
 
   stream=$(yt-dlp --no-warnings -g \
+    --extractor-args "youtube:player_client=android" \
     --format "bestvideo+bestaudio/best" \
     --add-header "Referer:$VIDSRC_BASE/" \
     "$embed_url" 2>/dev/null | tr -d '\r')

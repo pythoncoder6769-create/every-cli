@@ -15,7 +15,12 @@ Write-Host "Installing dependencies via Scoop..."
 scoop bucket add extras
 scoop install git fzf mpv yt-dlp ffmpeg
 
-# 3. Copy every-cli to Git Bash bin
+# 3. Setup yt-dlp config for reliable video playback
+$YtdlpConfigDir = "$env:APPDATA\yt-dlp"
+if (-not (Test-Path $YtdlpConfigDir)) { New-Item -ItemType Directory -Force -Path $YtdlpConfigDir | Out-Null }
+Set-Content -Path "$YtdlpConfigDir\config" -Value "--extractor-args `"youtube:player_client=android`"" -Force
+
+# 4. Copy every-cli to Git Bash bin
 $GitBin = "$env:USERPROFILE\scoop\apps\git\current\usr\bin"
 if (-not (Test-Path $GitBin)) {
   $GitBin = "C:\Program Files\Git\usr\bin"

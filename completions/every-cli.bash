@@ -6,7 +6,7 @@ _every_cli() {
   prev="${COMP_WORDS[COMP_CWORD-1]}"
 
   opts="-c --category -e --episode -q --quality -d --download --dub --vlc --no-color --continue -U --update -v --version -h --help"
-  categories="anime movies tv cartoons youtube live"
+  categories="anime movies tv cartoons youtube music live"
 
   case "$prev" in
     -c|--category)

@@ -1,18 +1,19 @@
 # every-cli
 
-Unified terminal streaming client for anime, movies, TV series, cartoons, YouTube, and live IPTV.
+Unified terminal streaming client for anime, movies, TV series, cartoons, music, YouTube, and live IPTV.
 
 Built in POSIX `sh` with an interactive `fzf` interface and `mpv` playback engine.
 
 ```
 every-cli v1.0.0 ─ Terminal Media Center
-Tip: Pass -q 1080 to stream directly in Full HD
+Tip: Quality is set to maximum by default — always the best available
 
   Category >
   > anime       Anime streaming (HiAnime 1080p, Sub & Dub)
     movies      Movies & Cinema (IMDb search & direct streaming)
     tv          TV Shows & Series (Seasons, episodes & streaming)
     cartoons    Cartoons (SuperCartoons 1500+ & Archive.org direct MP4)
+    music       Music (Audio-only, best quality, download MP3)
     youtube     YouTube (1080p HD video, podcasts & music)
     live        Live TV (8,000+ international IPTV channels)
     history     History (Resume previously watched streams)
@@ -43,6 +44,7 @@ Tip: Pass -q 1080 to stream directly in Full HD
 | **Movies** | IMDb API + Archive.org | VidSrc streaming embeds | YouTube HD | Direct MP4 / 1080p HLS |
 | **TV Series** | IMDb API + Archive.org | VidSrc episode embeds | YouTube HD | Direct MP4 / 1080p HLS |
 | **Cartoons** | SuperCartoons (1,500+) | Archive.org Animation | HiAnime / YouTube | Direct MP4 (480p–1080p) |
+| **Music** | YouTube Music / yt-dlp | MusicBrainz Metadata | — | 320kbps Audio-Only / MP3 Download |
 | **YouTube** | yt-dlp search engine | — | — | 1080p / 720p / 480p / Audio-Only |
 | **Live TV** | iptv-org index | Category playlists | — | Live HLS Streams |
 
@@ -152,6 +154,12 @@ every-cli -c movies "Night of the Living Dead"
 
 # Stream retro cartoons in direct MP4
 every-cli -c cartoons "Ben 10"
+
+# Stream music in highest quality (audio-only, terminal controls)
+every-cli -c music "Eminem Lose Yourself"
+
+# Download song as high-quality MP3 with metadata & album art
+every-cli -c music -d "Imagine Dragons Believer"
 
 # Stream YouTube in 1080p with synchronized audio
 every-cli -c youtube "lo-fi hip hop radio"
